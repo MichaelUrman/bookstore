@@ -14,6 +14,10 @@ Setup
 * Add a url mapping to your project's `urls.py` file (an empty prefix will work, but put it last):
 
         (r'^bookstore/$', include('bookstore.urls')),
+        
+* Make sure you have a `MEDIA_ROOT` and `MEDIA_URL` set up in your `settings.py`:
+
+        MEDIA_ROOT = '/home/www/mydjango-project/media/'
 
 * Sync the database:
 

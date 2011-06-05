@@ -1,0 +1,15 @@
+<html>
+<body>
+
+<div class="entry ui-corner-all" id="author">
+{# author bio: message ((with picture?)) #}
+<h3>{{ author.firstname }} {{ author.lastname }}
+<iframe id="fbl" src="http://www.facebook.com/plugins/like.php?href={{link|urlencode}}&amp;layout=button_count&amp;show_faces=true&amp;width=450&amp;action=like&amp;font=trebuchet+ms&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+</h3>
+<p>{{ author.biography_fmt|safe }}</p>
+</div>
+
+</div></body>
+</html>
+
+
