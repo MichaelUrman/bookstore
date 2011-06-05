@@ -3,6 +3,8 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('bookstore.views',
     (r'^$', 'storefront'),
     (r'^readme$', 'readme'),    # use to preview readme.md
+    (r'^site/news/', 'site_news'),
+    (r'^site/picks/', 'site_picks'),
     (r'^author/$', 'author_list'),
     (r'^author/(?P<author_link>\w+)$', 'author_detail'),
     (r'^genre/$', 'genre_list'),

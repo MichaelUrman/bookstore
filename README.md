@@ -22,6 +22,8 @@ Setup
 * Sync the database:
 
         % manage.py syncdb
+        
+* Provide css and images at `{{MEDIA_URL}}bookstore/style`. The files include `site.css`, `site_ie6.css`, `banner.jpg`, and `texel.png`. There's gotta be a better way for me to provide base versions of these, though...
 
 Administration
 --------------

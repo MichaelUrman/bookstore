@@ -28,7 +28,7 @@ class Person(models.Model):
     link = models.SlugField("Author Link", max_length=200, unique=True, help_text="Address: /author/[LINK]")
     firstname = models.CharField("First Name", max_length=100)
     lastname = models.CharField("Last Name", max_length=100)
-    email = models.EmailField("Email Address", max_length=255)
+    email = models.EmailField("Email Address", max_length=255, unique=True)
     metakeywords = models.TextField("Page Keywords", blank=True, help_text="Useful only for Visible Authors")
     metadescription = models.TextField("Page Description", blank=True, help_text="Useful only for Visible Authors")
     biography = models.TextField("Biography", help_text="Useful only for Visible Authors")
@@ -36,6 +36,7 @@ class Person(models.Model):
     author = models.BooleanField("Is Author", help_text="Make this person available to be a Book Author")
     editor = models.BooleanField("Is Editor", help_text="Make this person available to be an Editor")
     visible = models.BooleanField("Visible", help_text="Show this author in the store")
+    modified = models.DateField(auto_now=True)
     
     # sales = db.IntegerProperty()
     

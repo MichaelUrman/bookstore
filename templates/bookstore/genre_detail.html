@@ -1,10 +1,71 @@
-<html>
-<body>
+{% extends "bookstore/base.html" %}
 
+{% load bookstore_extras %}
+
+{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+{% block metakeywords %}{% if author.metakeywords %}{{ author.metakeywords }}{% else %}{{block.super}}{% endif %}{% endblock %}
+{% block metadescription %}{% if author.metadescription %}{{ author.metadescription }}{% else %}{{block.super}}{% endif %}{% endblock %}
+
+{% block rightbar %}
+{% url bookstore.views.storefront as siteurl %}
+<div id="fbg">
+<iframe class="ui-corner-all feature center rightbar" id="fbr" src="http://www.facebook.com/plugins/recommendations.php?site={{ siteurl|urlencode }}&amp;width=155&amp;height=500&amp;header=true&amp;colorscheme=light&amp;font=trebuchet+ms&amp;border_color=%23000&amp;ref=genre%3A{{genre.link}}" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+</div>
+{{block.super}}{% endblock rightbar %}
+
+{% block content %}
 <div class="entry ui-corner-all" id="genre" style="color: #{{genre.text_color}}; background: #{{genre.page_color}} url({{genre.page_image.url}}) top right no-repeat;">
 {# genre header: message with picture #}
 <h3>{{ genre.name }}</h3>
 <p>{{ genre.description }}</p>
+</div>
 
-</div></body>
-</html>
+{% if books|length %}
+{# books of this genre, ordered by xxx. include picture (expandable), short description, and link to publication page #}
+<h3 class="bridge"><span>Publications in <em>{{ genre.name }}</em></span></h3>
+<div class="entry grid ui-corner-all">
+{% for book in books %}
+    <div class="publication grid">
+        <a href="/book/{{book.link}}"><img class="cover ui-corner-all shadow" width="150" height="225" src="/image/book/small/{{book.link}}" alt="{{book.title}}" />
+        <br /><strong>{{book.title}}</strong></a>
+        <div class="tip ui-corner-all shadow">
+            <h3 class="title"><a href="/book/{{book.link}}">{{book.title}}</a></h3>
+            <p class="info">
+                <span class="author">A {{book.size}} by {% authorsof book %}</span>
+                <span>Genres: {% genresof book %}</span>
+                <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{book.ero_rating}}</a></span>
+                {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{book.isbn}}]{% endif %} {% if book.lbpn %}[LBP:{{book.lbpn}}]{% endif %}</span>{% endif %}
+                <span class="price">{{ book.price }}</span>
+            </p>
+            <div class="blurb">{{ book.blurb_fmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% pager bookpager %}
+{% endif %}
+
+{% if upcoming|count:1 %}
+{# upcoming releases of this genre, ordered by expected release #}
+<h3 class="bridge"><span>Upcoming <em>{{ genre.name }}</em> Releases</span></h3>
+<div class="entry grid ui-corner-all">
+{% for book in upcoming %}
+    <div class="publication grid">
+        <a href="/book/{{book.link}}"><img class="cover ui-corner-all shadow" width="150" height="225" src="/image/book/small/{{book.link}}" alt="{{book.title}}" />
+        <br /><strong>{{book.title}}</strong></a>
+        <div class="tip ui-corner-all shadow">
+            <h3 class="title"><a href="/book/{{book.link}}">{{book.title}}</a></h3>
+            <p class="info">
+                <span class="author">A {{book.size}} by {% authorsof book %}</span>
+                <span>Genres: {% genresof book %}</span>
+                <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{book.ero_rating}}</a></span>
+                {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{book.isbn}}]{% endif %} {% if book.lbpn %}[LBP:{{book.lbpn}}]{% endif %}</span>{% endif %}
+            </p>
+            <div class="blurb">{{ book.blurb_fmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% endblock content %}

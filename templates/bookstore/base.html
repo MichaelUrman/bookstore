@@ -1,0 +1,92 @@
+﻿{% spaceless %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" {% block htmlclass %}{% endblock %}> 
+<head>{% block htmlhead %}
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+	{% block js %}
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+	{% endblock js %}
+	{% block css %}<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="http://www.google.com/cse/api/branding.css" />
+	<link rel="stylesheet" type="text/css" href="/site_media/bookstore/style/site.css" />
+	<!--[if lt IE 7]><link rel="stylesheet" type="text/css" href="/site_media/bookstore/style/site_ie6.css" /><![endif]-->
+	{% endblock css %}
+    <link rel="shortcut icon" href="/favicon.png" type="image/png" /> 
+    <title>{% block title %}Lillibridge Press{% endblock title %}</title> 
+    <meta name="description" content="{% block metadescription %}Lillibridge Press: eBooks and Books in Print – Speculative Genre Fiction – Submissions – eBook Store – Fantasy – Science Fiction – Young Adult – Myths – Horror – Romance – Gay – Superhero – Erotica – Multiple Formats – PDF – Mobipocket – Palm Reader – MS Reader – EPUB – Lillibridge Press{% endblock %}" />
+    <meta name="keywords" content="{% block metakeywords %}eBooks, online book, POD, erotica, fantasy, science fiction, horror, superhero, LGBTQ, romance, speculative fiction, Adobe PDF, Sony Reader, Mobipocket, Microsoft Reader, paperback, independent bookstore, publisher, manuscript submissions, Lillibridge Press {% endblock %}" />
+{% endblock htmlhead %}</head>
+<body {% block bodyclass %}{% endblock %}>{% block body %}
+<div id="width">
+<div id="header" class="ui-corner-all">
+    {% block signin %}{% if not users.get_current_user %}
+        <div id="signin"><a href="{{loginurl}}" title="Sign in"><span class="ui-icon ui-icon-person"></span></a></div>
+    {% else %}
+        <div id="signin"><a href="{{logouturl}}" title="Sign out"><span class="ui-icon ui-icon-power"></span></a></div>
+    {% endif %}{% endblock signin %}
+    {% block news %}<iframe id="newspos" src="{% url bookstore.views.site_news %}"></iframe>{% endblock news %}
+</div>
+{% block search %}
+<form action="http://www.google.com/cse" id="cse-search-box">
+<div>
+    <input type="hidden" name="cx" value="008256111191834330470:hxmpxpd4rw8" />
+    <input type="hidden" name="ie" value="UTF-8" />
+    <input type="text" name="q" size="25" />
+    <input type="submit" name="sa" value="Search" />
+</div>
+</form>
+{% endblock search %}
+<div id="navbar">{% block navitems %}
+    <a class="ui-corner-bottom" href="/">Home</a>
+    <a class="ui-corner-bottom" href="/our_story">Our&nbsp;Story</a>
+    <a class="ui-corner-bottom" href="/about_us">About&nbsp;Us</a>
+    <a class="ui-corner-bottom" href="/about_ebooks">About&nbsp;eBooks</a>
+    <a class="ui-corner-bottom" href="/links">Links</a>
+    <a class="ui-corner-bottom" href="/submissions">Submissions</a>
+    {% endblock navitems %}
+</div>
+
+<div id="ct">
+<div id="body">{% block content %}{% endblock %}</div>
+<div id="left">{% block leftbar %}<div id="sidebar" class="ui-corner-all bshadow">{% block sidebar %}{{ skel_sidebar|safe }}{% endblock sidebar %}</div{#sidebar#}>{% endblock leftbar %}</div{#left#}>
+<div id="right"><div id="rightbar" class="ui-corner-all">
+{% block rightbar %}
+<iframe class="feature rightbar" src="{% url bookstore.views.site_picks %}"></iframe>
+{% endblock rightbar %}
+</div{#rightbar#}></div{#right#}>
+</div{##ct#}>
+
+<div id="footer" class="ui-corner-all bshadow">{% block footer %}
+    <a href="/">Home</a>
+    | <a href="/our_story">Our&nbsp;Story</a> 
+    | <a href="/about_us">About&nbsp;Us</a> 
+    | <a href="/about_ebooks">About&nbsp;eBooks</a> 
+    | <a href="/links">Links</a> 
+    | <a href="/submissions">Submissions</a> 
+    | <a href="/contact">Contact</a>
+    <br />
+    &#x2756; Copyright &copy; Lillibridge Press &#x2756; All Rights Reserved &#x2756;
+{% endblock footer %}</div{# id="footer"#}>
+
+{% endblock body %}
+<script type="text/javascript" src="http://www.google.com/cse/brand?form=cse-search-box&lang=en"></script>
+{% if 0 %}<script type="text/javascript"> 
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script> 
+<script type="text/javascript"> 
+try {
+var pageTracker = _gat._getTracker("UA-9774498-2");
+pageTracker._setDomainName(".lillibridgepress.com");
+pageTracker._trackPageview();
+} catch(err) {}</script> {% endif %}{#0#}
+
+<script type="text/javascript"> $(function() { {% block onready %}
+    $("#news").tabs().tabs("rotate", 7500).tabs("option", "fx", { opacity: "toggle" });
+{% endblock onready %}}); </script>
+{% block script %}{% endblock script %}
+</div>
+</body>
+</html>
+{% endspaceless %}

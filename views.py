@@ -19,6 +19,12 @@ def readme(request):
 
     return render_to_response("bookstore/markdown.html", dict(content=html))
 
+def site_news(request):
+    return HttpResponse("<html><body><p>(site news)</p></body></html>")
+
+def site_picks(request):
+    return HttpResponse("<html><body><p>(site picks)</p></body></html>")
+
 def author_list(request):
     return HttpResponse("TODO: not yet...")
     
