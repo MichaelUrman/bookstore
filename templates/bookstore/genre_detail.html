@@ -20,7 +20,7 @@
 <p>{{ genre.description }}</p>
 </div>
 
-{% if books|length %}
+{% if books.count %}
 {# books of this genre, ordered by xxx. include picture (expandable), short description, and link to publication page #}
 <h3 class="bridge"><span>Publications in <em>{{ genre.name }}</em></span></h3>
 <div class="entry grid ui-corner-all">
@@ -31,7 +31,7 @@
 {% pager bookpager %}
 {% endif %}
 
-{% if upcoming|count:1 %}
+{% if upcoming.count %}
 {# upcoming releases of this genre, ordered by expected release #}
 <h3 class="bridge"><span>Upcoming <em>{{ genre.name }}</em> Releases</span></h3>
 <div class="entry grid ui-corner-all">

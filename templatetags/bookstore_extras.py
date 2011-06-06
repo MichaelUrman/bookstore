@@ -59,12 +59,6 @@ def purchaseexpired(purchase):
     return purchase.date + oneday < now()
 
 @register.filter
-def count(value, limit=None):
-    if value:
-        return value.count(limit)
-    return 0
-
-@register.filter
 def timespan(value):
     seconds = value.seconds
     minutes, seconds = divmod(seconds, 60)

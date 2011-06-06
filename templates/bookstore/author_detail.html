@@ -16,7 +16,7 @@
 <p>{{ author.biography|minifmt|safe }}</p>
 </div>
 
-{% if books|length %}
+{% if books.count %}
 <h3 class="bridge"><span>Publications by <em>{{ author.firstname }} {{ author.lastname }}</em></span></h3>
 <div class="entry grid ui-corner-all">
 {% for book in books %}
@@ -26,7 +26,7 @@
 {% pager bookpager %}
 {% endif %}
 
-{% if upcoming|count:1 %}
+{% if upcoming.count %}
 {# upcoming releases of this author, ordered by expected release #}
 <h3 class="bridge"><span>Upcoming Releases by <em>{{ author.firstname }} {{ author.lastname }}</em></span></h3>
 <div class="entry grid ui-corner-all">
