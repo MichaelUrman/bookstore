@@ -81,11 +81,11 @@
 {% endif %}
 
 
-{% if book.media_set.count %}
+{% if book.bookmedia_set.count %}
 <h3 class="bridge"><span><em>{{book.title}}</em> Videos</span></h3>
-{% for media in book.media_set %}
+{% for media in book.bookmedia_set.all %}
 <div class="entry ui-corner-all media">
-    {{ media.writeup_fmt|safe }}
+    {{ media.writeup|minifmt|safe }}
     {% if media.youtube %}{{ media.youtube|youtube:media.video_size|safe }}{% endif %}
 </div>
 {% endfor %}

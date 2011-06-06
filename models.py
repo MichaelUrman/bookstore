@@ -88,7 +88,19 @@ class BookReview(models.Model):
     book = models.ForeignKey(Book)
     quote = models.TextField()
     reviewer = models.TextField()
-    date = models.DateField(default=datetime.now)
+    date = models.DateField()
 
     def __unicode__(self):
         return "%s by %s on %s" % (self.book, self.reviewer, self.date)
+        
+class BookMedia(models.Model):
+    book = models.ForeignKey(Book)
+    writeup = models.TextField()
+    video_size = models.CharField("Video Size", max_length=20, choices=(
+        ('500x405', "500 by 405"),
+        ('480x385', "480 by 385"),
+    ))
+    youtube = models.SlugField("Youtube Video Key", max_length=50, blank=True)
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.video_size, self.youtube)
