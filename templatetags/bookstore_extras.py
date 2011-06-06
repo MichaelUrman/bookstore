@@ -6,6 +6,49 @@ today = datetime.date.today
 now = datetime.datetime.now
 oneday = datetime.timedelta(1)
 
+import re
+_wiki_rules = [
+    (re.compile(r"\&"), "&amp;"),    # html characters
+    (re.compile(r"<"), "&lt;"),
+    (re.compile(r">"), "&gt;"),
+    (re.compile(r"\*([^*\s].*?[^*\s]|[^*\s])\*"), r"<strong>\1</strong>"),    # bold
+    (re.compile(r"_([^_\s].*?[^_\s]|[^_\s])_"), r"<em>\1</em>"),    # italic
+    (re.compile(r"\+([^+\s].*?[^+\s]|[^+\s])\+"), r"<u>\1</u>"),    # underline
+    (re.compile(r"^!\s+(.*)$"), r"<h2>\1</h2>"),      # h2
+    (re.compile(r"^!!\s+(.*)$"), r"<h3>\1</h3>"),     # h3
+    (re.compile(r"^!!!\s+(.*)$"), r"<h4>\1</h4>"),    # h4
+    (re.compile(r"^@center:!\s+(.*)$"), r"<h2 class='center'>\1</h2>"),   # h2
+    (re.compile(r"^@center:!!\s+(.*)$"), r"<h3 class='center'>\1</h3>"),  # h3
+    (re.compile(r"^@center:!!!\s+(.*)$"), r"<h4 class='center'>\1</h4>"), # h4
+    (re.compile(r"^={4,}$"), "</div><div class='entry ui-corner-all'>"), # bubble
+    (re.compile(r"^-{4,}$"), "<hr />"),      # hr
+    (re.compile(r"---"), "&mdash;"),
+    (re.compile(r"--"), "&ndash;"),
+    (re.compile(r"^@center:\s+(.*)$"), r"<p class='center'>\1</p>"),  # center
+    (re.compile(r"^@right:\s+(.*)$"), r"<p class='right'>\1</p>"),    # right
+    (re.compile(r"^$"), "<br /><br />"),     # hacky paragraph
+    (re.compile(r"\[a:(.*?)\]"), r"<a name='\1'></a>"), # named anchor
+    (re.compile(r"\[go(to)?:(.*?)\|(.*?)\]"), r"<a href='#\2'>\3</a>"), # internal link
+    (re.compile(r"\[url:(.*?)\|(.*?)\]"), r"<a href='\1'>\2</a>"),      # explicit link
+    (re.compile(r"\[color:(.*?)\|(.*?)\]"), r"<span style='color: \1;'>\2</span>"), # color override
+    (re.compile(r"\[youtube:(\d+)x(\d+)\|(\S+)\]"), r"""<object width="\1" height="\2"><param name="movie" value="http://www.youtube.com/v/$3&amp;hl=en_US&amp;fs=1&amp;color1=0x3a3a3a&amp;color2=0x999999&amp;border=1"><param name="allowFullScreen" value="true"><param name="allowscriptaccess" value="always"><embed type="application/x-shockwave-flash" width="\1" height="\2" src="http://www.youtube.com/v/\3&amp;hl=en_US&amp;fs=1&amp;color1=0x3a3a3a&amp;color2=0x999999&amp;border=1" allowscriptaccess="always" allowfullscreen="true" /></object>"""), # youtube link
+    (re.compile(r"""(^|[^:"'>]\b)(\w+:\/\/(?:[^\][ ()'",.]+(?:[\][(),.](?![\][()'",. ]|$)|[[(]?[\])]\.(?![()'",. ]|$))*)+)"""), r"\1<a href='\2'>\2</a>"),    # automatic link with schema
+    (re.compile(r"""(^|[^\/:"'>.\w])(www\.(?:[^\][ ()'",.]+(?:[\][(),.](?![\][()'",. ]|$)|[[(]?[\])]\.(?![()'",. ]|$))*)+)"""), r"\1<a href='http://\2'>\2</a>"),    # automatic link http assumed
+]
+@register.filter
+def minifmt(s, _wiki_rules=_wiki_rules):
+    lines = s.splitlines()
+    for i, line in enumerate(lines):
+        line_fmt = line
+        for rx, rp in _wiki_rules:
+            line_fmt, replaced = rx.subn(rp, line_fmt)
+        if line == line_fmt and len(lines) != 1:
+            line_fmt = "<p>" + line_fmt + "</p>"
+        lines[i] = line_fmt
+    fmt = "\n".join(lines)
+    return fmt
+minifmt.is_safe = True
+
 @register.filter
 def bookpublished(book):
     return book.publish_date >= today()
@@ -98,7 +141,7 @@ def set_of(items, template, empty='', first=', ', final=' &amp; '):
 @register.simple_tag
 def authorsof(book, linkify=True):
     if linkify:
-        template = lambda a: '<a href="/author/%s">%s %s</a>' % (a.link, a.firstname, a.lastname)
+        template = lambda a: '<a href="/bookstore/author/%s">%s %s</a>' % (a.link, a.firstname, a.lastname)
     else:
         template = lambda a: '%s %s' % (a.firstname, a.lastname)
     return set_of(book.authors.all(), template, '(nobody)')
@@ -106,7 +149,7 @@ def authorsof(book, linkify=True):
 @register.simple_tag
 def genresof(book, linkify=True):
     if linkify:
-        template = lambda g: '<a href="/genre/%s">%s</a>' % (g.link, g.name)
+        template = lambda g: '<a href="/bookstore/genre/%s">%s</a>' % (g.link, g.name)
     else:
         template = lambda g: '%s' % (g.name)
     return set_of(book.genres.all(), template, '(none)')

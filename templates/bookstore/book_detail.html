@@ -20,7 +20,7 @@
         {% if book.lbpn %}<span>LBP: {{ book.lbpn }}</span>{% endif %}
         <iframe id="fbl" src="http://www.facebook.com/plugins/like.php?href={{link|urlencode}}&amp;layout=button_count&amp;show_faces=true&amp;width=450&amp;action=like&amp;font=trebuchet+ms&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
     </p>
-    <p class="description">{{ book.description|safe }}</p>
+    <p class="description">{{ book.description|minifmt|safe }}</p>
 	</div>
 </div>
 
@@ -40,7 +40,7 @@
                 {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{ book.isbn }}]{% endif %} {% if book.lbpn %}[LBP:{{ book.lbpn }}]{% endif %}</span>{% endif %}
                 <span class="price">{{ book.price }}</span>
             </p>
-            <div class="blurb">{{ book.blurb|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
+            <div class="blurb">{{ book.blurb|minifmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
         </div>
     </div>
 {% endfor %}
@@ -64,7 +64,7 @@
                 <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{ book.ero_rating }}</a></span>
                 {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{ book.isbn }}]{% endif %} {% if book.lbpn %}[LBP:{{ book.lbpn }}]{% endif %}</span>{% endif %}
             </p>
-            <div class="blurb">{{ book.blurb|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>        </div>
+            <div class="blurb">{{ book.blurb|minifmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>        </div>
     </div>
 {% endfor %}
 </div>

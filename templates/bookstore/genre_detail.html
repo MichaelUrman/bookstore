@@ -37,7 +37,7 @@
                 {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{book.isbn}}]{% endif %} {% if book.lbpn %}[LBP:{{book.lbpn}}]{% endif %}</span>{% endif %}
                 <span class="price">{{ book.price }}</span>
             </p>
-            <div class="blurb">{{ book.blurb_fmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
+            <div class="blurb">{{ book.blurb|minifmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
         </div>
     </div>
 {% endfor %}
@@ -61,7 +61,7 @@
                 <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{book.ero_rating}}</a></span>
                 {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{book.isbn}}]{% endif %} {% if book.lbpn %}[LBP:{{book.lbpn}}]{% endif %}</span>{% endif %}
             </p>
-            <div class="blurb">{{ book.blurb_fmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
+            <div class="blurb">{{ book.blurb|minifmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
         </div>
     </div>
 {% endfor %}
