@@ -1,5 +1,5 @@
 from django.contrib import admin
-from bookstore.models import Genre, Person
+from bookstore.models import Genre, Person, Book
 
 class GenreAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -21,5 +21,18 @@ class PersonAdmin(admin.ModelAdmin):
     list_editable = ("author", "editor")
     prepopulated_fields = {"link": ("firstname", "lastname")}
 
+class BookAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {"fields": ["title", "link", "isbn", "lbpn"]}),
+        ("Category", {"fields": ["authors", "genres", "size", "ero_rating", "price"]}),
+        ("Display", {"fields": ["blurb", "description", "page_image", "page_image_small", "visible", "upcoming", "feature", "bestseller"]}),
+        ("Dates", {"fields": ["added_date", "publish_date"]}),
+        ("SEO", {"fields": ["metakeywords", "metadescription"]}),
+    ]
+    list_display = ("title", "link", "visible", "upcoming", "feature", "bestseller", "publish_date")
+    list_editable = ("visible", "upcoming", "feature", "bestseller", "publish_date")
+    prepopulated_fields = {"link": ("title",)}
+
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Person, PersonAdmin)
+admin.site.register(Book, BookAdmin)

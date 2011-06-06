@@ -44,3 +44,41 @@ class Person(models.Model):
         return "%s, %s <%s>" % (self.lastname, self.firstname, self.email)
         
         
+class Book(models.Model):
+    link = models.SlugField("Book Link", max_length=200, unique=True, help_text="Book: /book/[LINK]")
+    isbn = models.SlugField("ISBN", max_length=50, blank=True, help_text="ISBN, if available")
+    lbpn = models.SlugField("LBPN", max_length=50, blank=True, help_text="LBPN, if available")
+    size = models.CharField("Size", max_length=50, choices=(
+        ('Free Read', 'Free Read'),
+        ('Short Fiction', 'Short Fiction (2,500 to 7,500 words)'),
+        ('Novelette', 'Novelette (7,500 to 17,500 words)'),
+        ('Novella', 'Novella (17,500 to 40,000 words)'),
+        ('Novel', 'Novel (40,000 to 100,000 words)'),
+    ))
+    title = models.CharField("Title", max_length=200)
+    blurb = models.TextField("Blurb", help_text="Short description of the book shown in search results")
+    description = models.TextField("Description", help_text="Description shown on the book's page")
+    page_image = models.ImageField(upload_to='bookstore/img', help_text="Generally a 400x600 image of the book's cover")
+    page_image_small = models.ImageField(upload_to='bookstore/img', help_text="Generally a 150x225 version of the book's cover")
+    added_date = models.DateField("Date added")
+    publish_date = models.DateField("Date published", help_text="Consider as an upcoming book until this date; an available book thereafter.")
+    ero_rating = models.CharField("Heat Rating", max_length=20, choices=(
+        ('Young Adult', 'Young Adult (safe for ages 14 to 21)'),
+        ('Smolder', 'Smolder (non-consummated sex scenes)'),
+        ('Smoke', 'Smoke (sensual and euphemistic sex scenes)'),
+        ('Burn', 'Burn (sensual and explict, graphic, direct)'),
+        ('Blaze', 'Blaze (frequent, explict, graphic, frank)'),
+        ('Inferno', 'Inferno (quite frequent, explict, graphic, frank, or objectionable)'),
+    ))
+    authors = models.ManyToManyField(Person, limit_choices_to={"author": True})
+    genres = models.ManyToManyField(Genre)
+    visible = models.BooleanField("Visible", help_text="Show this book in the store")
+    metakeywords = models.TextField("Page Keywords", blank=True, help_text="Useful only for Visible Authors")
+    metadescription = models.TextField("Page Description", blank=True, help_text="Useful only for Visible Authors")
+    price = models.CharField("price", max_length=20, help_text="Price to display on the book's page")
+    upcoming = models.BooleanField(default=True, help_text="Include in upcoming lists if Publish Date is in the future")
+    feature = models.BooleanField(default=False, help_text="Include this book as a potential featured item")
+    bestseller = models.BooleanField(default=False, help_text="Include this book as a potential bestseller")
+
+    def __unicode__(self):
+        return "%s, a %s (%s)" % (self.title, self.size, self.link)

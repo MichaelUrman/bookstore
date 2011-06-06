@@ -1,0 +1,160 @@
+{% extends "bookstore/base.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}{{ book.title }} - {{ block.super }}{% endblock %}
+{% block metakeywords %}{% if book.metakeywords %}{{ book.metakeywords }}{% else %}{{block.super}}{% endif %}{% endblock %}
+{% block metadescription %}{% if book.metadescription %}{{ book.metadescription }}{% else %}{{block.super}}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all">
+	<div class="publication">
+    <a href="{{ book.page_image.url }}" id="coverlink"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" /></a>
+    <br />
+    <h3 class="title">{{book.title}}</h3>
+    <p class="info">
+        <span class="author">A {{book.size}} by {% authorsof book %}</span>
+        <span>Genres: {% genresof book %}</span>
+        <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{ book.ero_rating }}</a></span>
+        {% if book.isbn %}<span>ISBN: {{ book.isbn }}</span>{% endif %}
+        {% if book.lbpn %}<span>LBP: {{ book.lbpn }}</span>{% endif %}
+        <iframe id="fbl" src="http://www.facebook.com/plugins/like.php?href={{link|urlencode}}&amp;layout=button_count&amp;show_faces=true&amp;width=450&amp;action=like&amp;font=trebuchet+ms&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+    </p>
+    <p class="description">{{ book.description|safe }}</p>
+	</div>
+</div>
+
+{% if books|length %}
+<h3 class="bridge"><span>Publications by <em>{{ author.firstname }} {{ author.lastname }}</em></span></h3>
+<div class="entry grid ui-corner-all">
+{% for book in books %}
+    <div class="publication grid">
+        <a href="{% url book_detail book.link %}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{book.title}}" />
+        <br /><strong>{{ book.title }}</strong></a>
+        <div class="tip ui-corner-all shadow">
+            <h3 class="title"><a href="{% url book_detail book.link %}">{{ book.title }}</a></h3>
+            <p class="info">
+                <span class="author">A {{ book.size }} by {% authorsof book %}</span>
+                <span>Genres: {% genresof book %}</span>
+                <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{ book.ero_rating }}</a></span>
+                {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{ book.isbn }}]{% endif %} {% if book.lbpn %}[LBP:{{ book.lbpn }}]{% endif %}</span>{% endif %}
+                <span class="price">{{ book.price }}</span>
+            </p>
+            <div class="blurb">{{ book.blurb|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% pager bookpager %}
+{% endif %}
+
+{% if upcoming|count:1 %}
+{# upcoming releases of this author, ordered by expected release #}
+<h3 class="bridge"><span>Upcoming Releases by <em>{{ author.firstname }} {{ author.lastname }}</em></span></h3>
+<div class="entry grid ui-corner-all">
+{% for book in upcoming %}
+    <div class="publication grid">
+        <a href="{% url book_detail book.link %}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" />
+        <br /><strong>{{ book.title }}</strong></a>
+        <div class="tip ui-corner-all shadow">
+            <h3 class="title"><a href="{% url book_detail book.link %}">{{ book.title }}</a></h3>
+            <p class="info">
+                <span class="author">A {{ book.size }} by {% authorsof book %}</span>
+                <span>Genres: {% genresof book %}</span>
+                <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{ book.ero_rating }}</a></span>
+                {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{ book.isbn }}]{% endif %} {% if book.lbpn %}[LBP:{{ book.lbpn }}]{% endif %}</span>{% endif %}
+            </p>
+            <div class="blurb">{{ book.blurb|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>        </div>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if book.review_set|count:1 %}
+<h3 class="bridge"><span>Reviews of <em>{{book.title}}</em></span></h3>
+{% for review in book.review_set %}
+<div class="entry ui-corner-all review">
+    <q>{{ review.quote_fmt|safe }}</q>
+    <cite>{{ review.reviewer_fmt|safe }}</cite>
+</div>
+{% endfor %}
+{% endif %}
+
+
+{% if book.media_set|count:1 %}
+<h3 class="bridge"><span><em>{{book.title}}</em> Videos</span></h3>
+{% for media in book.media_set %}
+<div class="entry ui-corner-all media">
+    {{ media.writeup_fmt|safe }}
+    {% if media.youtube %}{{ media.youtube|youtube:media.video_size|safe }}{% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+
+{% if book.wallpaper_set|count:1 %}
+<h3 class="bridge"><span><em>{{book.title}}</em> Wallpaper</span></h3>
+<div class="entry ui-corner-all grid">
+{% for wall in book.wallpaper_set %}
+<div class="wallpaper grid">
+    <img src="{{wall.image|imageblob:220}}" class="wallpaper ui-corner-all shadow" />
+    <div class="tip ui-corner-all shadow">
+        <strong>Pick a size</strong>
+        {% wallpapers wall aspects %}
+    </div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+<img id="coverimg" style="display: none;" width="400" height="600">
+{% endblock content %}
+
+
+{% block rightbar %}
+{% if book.published %}
+{% if book.publication_set|count:1 %}
+<div class="sale ui-corner-all rightbar">
+{% if book.free %}
+<h3>Download <em>{{ book.title }}</em> now for free</h3>
+{% else %}
+<h3>Buy <em>{{ book.title }}</em> now for <span class="price">{{ book.price }}</span></h3>
+<em>Click a format to begin:</em>
+{% endif %}
+<form method="post" action="/buy">{% for format in formats %}{% if format.this_publication %}
+<input type="hidden" name="continue" value="/book/{{book.link}}" />
+<input type="hidden" name="pub" value="{{format.this_publication.key}}" />
+<p><button><image src="/image/format/{{format.key}}"/> {{ format.name }}</button></p>
+{% endif %}{% endfor %}
+{% if not book.free %}
+<img src="/lp/paypal-verified.png" width="128" height="128" alt="PayPal Verified" />
+{% endif %}
+</form>
+</div>
+{% endif %}
+
+{% if book.resale_set|count:1 %}
+<div class="sale ui-corner-all rightbar">
+<h3>Order <em>{{ book.title }}</em> in print</h3>
+<em>Click a retailer to begin:</em>
+<p>{% for reseller in resellers %}
+{% if reseller.this_resale %}<br /><a href="{{reseller.this_resale.url}}"><image src="/image/reseller/{{reseller.key}}" alt="Buy at {{reseller.name}}"/></a>{% endif %}
+{% endfor %}</p>
+{% endif %}</div>
+{% endif %}
+{% endblock rightbar %}
+
+
+{% block script %}
+<script type="text/javascript">
+$(function() {
+    $("#coverlink").click(function(e) {
+        e.preventDefault();
+        var small = $(this);
+        var imgurl = small.attr("href");
+        $("#coverimg").attr("src", imgurl).dialog({title: '{{book.title}}', resizable: false, position: [small.offset().left - 13 - $(window).scrollLeft(), small.offset().top - 13 - $(window).scrollTop()], show: 'slide', hide: 'slide', width: 400, height: 600});
+    });
+    $("#coverimg").click(function(e) { $("#coverimg").dialog("close"); });
+});
+</script>
+{% endblock script %}

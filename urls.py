@@ -7,6 +7,8 @@ urlpatterns = patterns('bookstore.views',
     (r'^site/picks/', 'site_picks'),
     (r'^author/$', 'author_list'),
     (r'^author/(?P<author_link>\w+)$', 'author_detail'),
+    (r'^book/$', 'book_list'),
+    (r'^book/(?P<book_link>\w+)$', 'book_detail'),
     (r'^genre/$', 'genre_list'),
     (r'^genre/(?P<genre_link>\w+)$', 'genre_detail'),
 )

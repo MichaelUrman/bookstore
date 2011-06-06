@@ -49,9 +49,9 @@ def chain(value, next):
     for v in value: yield v
     for v in next: yield v
     
-#@register.filter
-#def imageblob(value, size=None):
-#    return get_serving_url(str(value.key()), size and int(size))
+@register.filter
+def imageblob(value, size=None):
+    return get_serving_url(str(value.key()), size and int(size))
     
 @register.filter
 def ppattrs(value, name=None):
@@ -101,7 +101,7 @@ def authorsof(book, linkify=True):
         template = lambda a: '<a href="/author/%s">%s %s</a>' % (a.link, a.firstname, a.lastname)
     else:
         template = lambda a: '%s %s' % (a.firstname, a.lastname)
-    return set_of(book.author_set, template, '(nobody)')
+    return set_of(book.authors.all(), template, '(nobody)')
         
 @register.simple_tag
 def genresof(book, linkify=True):
@@ -109,5 +109,5 @@ def genresof(book, linkify=True):
         template = lambda g: '<a href="/genre/%s">%s</a>' % (g.link, g.name)
     else:
         template = lambda g: '%s' % (g.name)
-    return set_of(book.genre_set, template, '(none)')
+    return set_of(book.genres.all(), template, '(none)')
         
