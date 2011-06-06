@@ -4,6 +4,23 @@ from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404
 
 from bookstore.models import Genre, Person, Book
+from datetime import datetime
+
+class Pager:
+    def __init__(self, request, count, pagesize=12):
+        try: page = int(request.REQUEST.get("p", 0))
+        except ValueError: page = 0
+        try: size = int(request.REQUEST.get("c", pagesize))
+        except ValueError: size = pagesize
+        self.page = page
+        self.size = size
+        self.offset = size * page
+        self.count = count
+        self.pagecount = (count + size - 1) // size
+        self.sizer = sizer = size != pagesize and "&c=%s" % size or ""
+
+        self.next = (page * size + size < count) and ("?p=%s" % (page + 1) + sizer) or ""
+        self.prev = (page > 0) and ("?p=%s" % (page - 1) + sizer) or ""
 
 def storefront(request):
     return render_to_response("bookstore/storefront.html")
@@ -30,7 +47,10 @@ def author_list(request):
 
 def author_detail(request, author_link):
     author = get_object_or_404(Person, link=author_link)
-    return render_to_response("bookstore/author_detail.html", dict(author=author, link=request.build_absolute_uri()))
+    bookpager = Pager(request, 100)
+    books = author.book_set.filter(visible=True).filter(publish_date__lte=datetime.now)
+    link = request.build_absolute_uri()
+    return render_to_response("bookstore/author_detail.html", locals())
 
 def book_list(request):
     return HttpResponse("TODO: not yet...")
@@ -44,4 +64,7 @@ def genre_list(request):
 
 def genre_detail(request, genre_link):
     genre = get_object_or_404(Genre, link=genre_link)
-    return render_to_response("bookstore/genre_detail.html", dict(genre=genre, link=request.build_absolute_uri()))
+    bookpager = Pager(request, 100)
+    books = genre.book_set.filter(visible=True).filter(publish_date__lte=datetime.now)
+    link = request.build_absolute_uri()
+    return render_to_response("bookstore/genre_detail.html", locals())

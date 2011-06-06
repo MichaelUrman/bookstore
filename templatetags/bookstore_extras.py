@@ -1,3 +1,4 @@
+from django.utils.http import urlquote
 from django import template
 register = template.Library()
 
@@ -153,4 +154,28 @@ def genresof(book, linkify=True):
     else:
         template = lambda g: '%s' % (g.name)
     return set_of(book.genres.all(), template, '(none)')
+    
+@register.simple_tag
+def fblike(link):
+    return """<iframe id="fbl" src="http://www.facebook.com/plugins/like.php?href=""" + urlquote(link, safe="") + """&amp;layout=button_count&amp;show_faces=true&amp;width=450&amp;action=like&amp;font=trebuchet+ms&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe>"""
+    
+@register.simple_tag
+def fbrec(link, refkind, ref):
+    return """<iframe class="ui-corner-all feature center rightbar" id="fbr" src="http://www.facebook.com/plugins/recommendations.php?site=""" + urlquote(link, safe="") + """&amp;width=155&amp;height=500&amp;header=true&amp;colorscheme=light&amp;font=trebuchet+ms&amp;border_color=%23000&amp;ref=""" + urlquote(refkind, safe="") + "%3A" + urlquote(ref, safe="") + """" scrolling="no" frameborder="0" allowTransparency="true"></iframe>"""
         
+@register.tag
+def bookcard(parser, token):
+    try:
+        # split_contents() knows not to split quoted strings.
+        tag_name, book_variable = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, "%r tag requires exactly one arguments" % token.contents.split()[0]
+    return FormatBookCardNode(book_variable)
+    
+class FormatBookCardNode(template.Node):
+    def __init__(self, book_variable):
+        self.book_reference = template.Variable(book_variable)
+    def render(self, context):
+        book = self.book_reference.resolve(context)
+        t = template.loader.get_template('bookstore/book_summary.html')
+        return t.render(context.__class__({'book': book}, autoescape=context.autoescape))

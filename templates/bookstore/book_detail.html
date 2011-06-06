@@ -18,7 +18,7 @@
         <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{ book.ero_rating }}</a></span>
         {% if book.isbn %}<span>ISBN: {{ book.isbn }}</span>{% endif %}
         {% if book.lbpn %}<span>LBP: {{ book.lbpn }}</span>{% endif %}
-        <iframe id="fbl" src="http://www.facebook.com/plugins/like.php?href={{link|urlencode}}&amp;layout=button_count&amp;show_faces=true&amp;width=450&amp;action=like&amp;font=trebuchet+ms&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+        {% fblike link %}
     </p>
     <p class="description">{{ book.description|minifmt|safe }}</p>
 	</div>
