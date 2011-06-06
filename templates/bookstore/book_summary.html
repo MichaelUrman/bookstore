@@ -1,6 +1,6 @@
 {% load bookstore_extras %}
 
-{% url bookstore.views.book book_link=book.link as booklink %}
+{% url bookstore.views.book_detail book_link=book.link as booklink %}
 
 <div class="publication grid">
     <a href="{{ booklink }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" />
