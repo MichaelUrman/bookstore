@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 # Storage models
 class ImageBlob(models.Model):
@@ -82,3 +83,12 @@ class Book(models.Model):
 
     def __unicode__(self):
         return "%s, a %s (%s)" % (self.title, self.size, self.link)
+
+class BookReview(models.Model):
+    book = models.ForeignKey(Book)
+    quote = models.TextField()
+    reviewer = models.TextField()
+    date = models.DateField(default=datetime.now)
+
+    def __unicode__(self):
+        return "%s by %s on %s" % (self.book, self.reviewer, self.date)

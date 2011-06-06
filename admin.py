@@ -1,5 +1,5 @@
 from django.contrib import admin
-from bookstore.models import Genre, Person, Book
+from bookstore.models import Genre, Person, Book, BookReview
 
 class GenreAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -20,6 +20,10 @@ class PersonAdmin(admin.ModelAdmin):
     list_display = ("firstname", "lastname", "author", "editor")
     list_editable = ("author", "editor")
     prepopulated_fields = {"link": ("firstname", "lastname")}
+    
+class BookReviewInline(admin.TabularInline):
+    model = BookReview
+    extra = 2
 
 class BookAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -29,10 +33,11 @@ class BookAdmin(admin.ModelAdmin):
         ("Dates", {"fields": ["added_date", "publish_date"]}),
         ("SEO", {"fields": ["metakeywords", "metadescription"]}),
     ]
+    inlines = [BookReviewInline]
     list_display = ("title", "link", "visible", "upcoming", "feature", "bestseller", "publish_date")
     list_editable = ("visible", "upcoming", "feature", "bestseller", "publish_date")
     prepopulated_fields = {"link": ("title",)}
-
+    
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Book, BookAdmin)
