@@ -27,6 +27,10 @@ class Genre(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.link)
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('bookstore.views.genre_detail', (), dict(genre_link=self.link))
+
 class Person(models.Model):
     link = models.SlugField("Author Link", max_length=200, unique=True, help_text="Address: /author/[LINK]")
     firstname = models.CharField("First Name", max_length=100)
@@ -45,6 +49,10 @@ class Person(models.Model):
     
     def __unicode__(self):
         return "%s, %s <%s>" % (self.lastname, self.firstname, self.email)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('bookstore.views.author_detail', (), dict(author_link=self.link))
 
 class Book(models.Model):
     link = models.SlugField("Book Link", max_length=200, unique=True, help_text="Book: /book/[LINK]")
@@ -84,6 +92,10 @@ class Book(models.Model):
 
     def __unicode__(self):
         return "%s, a %s (%s)" % (self.title, self.size, self.link)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('bookstore.views.book_detail', (), dict(book_link=self.link))
 
 class BookReview(models.Model):
     book = models.ForeignKey(Book)

@@ -24,51 +24,6 @@
 	</div>
 </div>
 
-{% if books.count %}
-<h3 class="bridge"><span>Publications by <em>{{ author.firstname }} {{ author.lastname }}</em></span></h3>
-<div class="entry grid ui-corner-all">
-{% for book in books %}
-    <div class="publication grid">
-        <a href="{% url book_detail book.link %}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{book.title}}" />
-        <br /><strong>{{ book.title }}</strong></a>
-        <div class="tip ui-corner-all shadow">
-            <h3 class="title"><a href="{% url book_detail book.link %}">{{ book.title }}</a></h3>
-            <p class="info">
-                <span class="author">A {{ book.size }} by {% authorsof book %}</span>
-                <span>Genres: {% genresof book %}</span>
-                <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{ book.ero_rating }}</a></span>
-                {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{ book.isbn }}]{% endif %} {% if book.lbpn %}[LBP:{{ book.lbpn }}]{% endif %}</span>{% endif %}
-                <span class="price">{{ book.price }}</span>
-            </p>
-            <div class="blurb">{{ book.blurb|minifmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>
-        </div>
-    </div>
-{% endfor %}
-</div>
-{% pager bookpager %}
-{% endif %}
-
-{% if upcoming.count %}
-{# upcoming releases of this author, ordered by expected release #}
-<h3 class="bridge"><span>Upcoming Releases by <em>{{ author.firstname }} {{ author.lastname }}</em></span></h3>
-<div class="entry grid ui-corner-all">
-{% for book in upcoming %}
-    <div class="publication grid">
-        <a href="{% url book_detail book.link %}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" />
-        <br /><strong>{{ book.title }}</strong></a>
-        <div class="tip ui-corner-all shadow">
-            <h3 class="title"><a href="{% url book_detail book.link %}">{{ book.title }}</a></h3>
-            <p class="info">
-                <span class="author">A {{ book.size }} by {% authorsof book %}</span>
-                <span>Genres: {% genresof book %}</span>
-                <span>Heat Rating: <a href="/about_ebooks#heat-rating">{{ book.ero_rating }}</a></span>
-                {% if book.isbn or book.lbpn %}<span>{% if book.isbn %}[ISBN:{{ book.isbn }}]{% endif %} {% if book.lbpn %}[LBP:{{ book.lbpn }}]{% endif %}</span>{% endif %}
-            </p>
-            <div class="blurb">{{ book.blurb|minifmt|safe }}<p class="more right"><a href="/book/{{book.link}}">(Read More...)</a></p></div>        </div>
-    </div>
-{% endfor %}
-</div>
-{% endif %}
 
 {% if book.bookreview_set.count %}
 <h3 class="bridge"><span>Reviews of <em>{{ book.title }}</em></span></h3>
