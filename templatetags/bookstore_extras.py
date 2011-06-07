@@ -98,19 +98,6 @@ def ppattrs(value, name=None):
     return set([attr for attr in dir(value) if attr.startswith('pp_')] + 'pp_business pp_charset pp_first_name pp_handling_amount pp_handling_amount pp_invoice pp_last_name pp_item_name pp_mc_currency pp_mc_fee pp_mc_gross pp_notify_version pp_payer_email pp_payer_id pp_payer_status pp_payment_date pp_payment_fee pp_payment_gross pp_payment_status pp_payment_type pp_protection_eligibility pp_quantity pp_receiver_email pp_receiver_id pp_residence_country pp_shipping pp_tax pp_transaction_subject pp_txn_id pp_txn_type pp_verify_sign'.split())
         
 @register.simple_tag
-def wallpapers(wall, aspects):
-    pieces = []
-    for aspect in aspects:
-        if aspect.ratio == wall.aspect:
-            for size in aspect:
-                w, h = map(int, size.split('x'))
-                if w == wall.width and h == wall.height:
-                    pieces.append('<a href="/image/wall/%s">%s</a>' % (wall.key(), size));
-                elif w <= wall.width and h <= wall.height:
-                    pieces.append('<a href="%s">%s</a>' % (get_serving_url(str(wall.image.key()), w), size))
-    return ''.join(pieces)
-        
-@register.simple_tag
 def pager(info):
     if info.pagecount < 2:
         return ''
@@ -136,7 +123,7 @@ def set_of(items, template, empty='', first=', ', final=' &amp; '):
 @register.simple_tag
 def authorsof(book, linkify=True):
     if linkify:
-        template = lambda a: '<a href="/bookstore/author/%s">%s %s</a>' % (a.link, a.firstname, a.lastname)
+        template = lambda a: '<a href="%s">%s %s</a>' % (a.get_absolute_url(), a.firstname, a.lastname)
     else:
         template = lambda a: '%s %s' % (a.firstname, a.lastname)
     return set_of(book.authors.all(), template, '(nobody)')
@@ -144,7 +131,7 @@ def authorsof(book, linkify=True):
 @register.simple_tag
 def genresof(book, linkify=True):
     if linkify:
-        template = lambda g: '<a href="/bookstore/genre/%s">%s</a>' % (g.link, g.name)
+        template = lambda g: '<a href="%s">%s</a>' % (g.get_absolute_url(), g.name)
     else:
         template = lambda g: '%s' % (g.name)
     return set_of(book.genres.all(), template, '(none)')

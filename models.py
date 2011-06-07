@@ -3,11 +3,6 @@ from django.db.models.signals import post_save
 from django.core.files import File
 from datetime import datetime
 
-# Storage models
-class ImageBlob(models.Model):
-    modified = models.DateTimeField(auto_now=True)
-    image = models.ImageField(upload_to='bookstore/img')
-
 # Base models
 class Genre(models.Model):
     link = models.SlugField("Genre Link", max_length=200, unique=True, help_text="Address: /genre/[LINK]")
@@ -18,8 +13,7 @@ class Genre(models.Model):
     description = models.TextField("Description", help_text="Long description shown on genre's page")
     text_color = models.SlugField("Text Color", help_text="Color of text on genre's image")
     page_color = models.SlugField("Page Color", help_text="Color of background on genre's image")
-    #page_image = models.ForeignKey(ImageBlob, related_name='+')
-    page_image = models.ImageField(upload_to='bookstore/img')
+    page_image = models.ImageField(upload_to='bookstore/img/genre')
     metakeywords = models.TextField("Page Keywords", blank=True)
     metadescription = models.TextField("Page Description", blank=True)
     modified = models.DateField(auto_now=True)
@@ -68,8 +62,8 @@ class Book(models.Model):
     title = models.CharField("Title", max_length=200)
     blurb = models.TextField("Blurb", help_text="Short description of the book shown in search results")
     description = models.TextField("Description", help_text="Description shown on the book's page")
-    page_image = models.ImageField(upload_to='bookstore/img', help_text="Generally a 400x600 image of the book's cover")
-    page_image_small = models.ImageField(upload_to='bookstore/img', help_text="Generally a 150x225 version of the book's cover")
+    page_image = models.ImageField(upload_to='bookstore/img/book', help_text="Generally a 400x600 image of the book's cover")
+    page_image_small = models.ImageField(upload_to='bookstore/img/book', help_text="Generally a 150x225 version of the book's cover")
     added_date = models.DateField("Date added")
     publish_date = models.DateField("Date published", help_text="Consider as an upcoming book until this date; an available book thereafter.")
     ero_rating = models.CharField("Heat Rating", max_length=20, choices=(
@@ -120,8 +114,8 @@ class BookMedia(models.Model):
 
 class BookWallpaper(models.Model):
     book = models.ForeignKey(Book)
-    wallpaper = models.ImageField(upload_to='bookstore/img', width_field="wallwidth", height_field="wallheight", help_text="Try to include the largest of any of these size groups. There's no need to include more than one.\n16x10: 1920x1200, 1440x900, 1280x800\n4x3: 1600x1200, 1024x768\n16x9: 1920x1080\n5x4: 1280x1024")
-    thumbnail = models.ImageField(upload_to='bookstore/img', width_field="thumbwidth", height_field="thumbheight", help_text="Automatically generated if not provided")
+    wallpaper = models.ImageField(upload_to='bookstore/img/wall', width_field="wallwidth", height_field="wallheight", help_text="Try to include the largest of any of these size groups. There's no need to include more than one.\n16x10: 1920x1200, 1440x900, 1280x800\n4x3: 1600x1200, 1024x768\n16x9: 1920x1080\n5x4: 1280x1024")
+    thumbnail = models.ImageField(upload_to='bookstore/img/wall', width_field="thumbwidth", height_field="thumbheight", help_text="Automatically generated if not provided")
     wallwidth = models.IntegerField()
     wallheight = models.IntegerField()
     thumbwidth = models.IntegerField(default=0)
