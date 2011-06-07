@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.core.files import File
 from datetime import datetime
 
 # Storage models
@@ -24,7 +26,7 @@ class Genre(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.link)
-        
+
 class Person(models.Model):
     link = models.SlugField("Author Link", max_length=200, unique=True, help_text="Address: /author/[LINK]")
     firstname = models.CharField("First Name", max_length=100)
@@ -43,8 +45,7 @@ class Person(models.Model):
     
     def __unicode__(self):
         return "%s, %s <%s>" % (self.lastname, self.firstname, self.email)
-        
-        
+
 class Book(models.Model):
     link = models.SlugField("Book Link", max_length=200, unique=True, help_text="Book: /book/[LINK]")
     isbn = models.SlugField("ISBN", max_length=50, blank=True, help_text="ISBN, if available")
@@ -91,8 +92,8 @@ class BookReview(models.Model):
     date = models.DateField()
 
     def __unicode__(self):
-        return "%s by %s on %s" % (self.book, self.reviewer, self.date)
-        
+        return "%s by %s on %s" % (self.book.title, self.reviewer, self.date)
+
 class BookMedia(models.Model):
     book = models.ForeignKey(Book)
     writeup = models.TextField()
@@ -103,4 +104,46 @@ class BookMedia(models.Model):
     youtube = models.SlugField("Youtube Video Key", max_length=50, blank=True)
 
     def __unicode__(self):
-        return "%s (%s)" % (self.video_size, self.youtube)
+        return "%s %s (%s)" % (self.book.title, self.video_size, self.youtube)
+
+class BookWallpaper(models.Model):
+    book = models.ForeignKey(Book)
+    wallpaper = models.ImageField(upload_to='bookstore/img', width_field="wallwidth", height_field="wallheight", help_text="Try to include the largest of any of these size groups. There's no need to include more than one.\n16x10: 1920x1200, 1440x900, 1280x800\n4x3: 1600x1200, 1024x768\n16x9: 1920x1080\n5x4: 1280x1024")
+    thumbnail = models.ImageField(upload_to='bookstore/img', width_field="thumbwidth", height_field="thumbheight", help_text="Automatically generated if not provided")
+    wallwidth = models.IntegerField()
+    wallheight = models.IntegerField()
+    thumbwidth = models.IntegerField(default=0)
+    thumbheight = models.IntegerField(default=0)
+    
+    def __unicode__(self):
+        return "%s at %dx%d" % (self.book.title, self.wallwidth, self.wallheight)
+
+def wallpaper_thumbnail(sender, **kwargs):
+    w = kwargs["instance"]
+    from os import path
+    try:
+        wallpath = w.wallpaper.path
+        thumbpath = w.thumbnail.path
+    except ValueError:
+        thumbpath = path.splitext(wallpath)[0] + ".thumb.jpg"
+    try:
+        if path.getmtime(wallpath) <= path.getmtime(thumbpath):
+            return
+    except EnvironmentError:
+        pass
+    
+    from PIL import Image
+    image = Image.open(w.wallpaper.path)
+    if image.mode not in ('L', 'RGB'):
+        image = image.convert('RGB')
+    image.thumbnail((220, 220), Image.ANTIALIAS)
+
+    from StringIO import StringIO
+    data = StringIO()
+    image.save(data, "JPEG")
+    data.size = data.tell()
+    data.seek(0, 0)
+    #data.name = path.basename(thumbpath)
+    w.thumbnail.save(path.basename(thumbpath), File(data))
+    
+post_save.connect(wallpaper_thumbnail, sender=BookWallpaper)

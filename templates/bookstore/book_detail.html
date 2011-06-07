@@ -92,16 +92,14 @@
 {% endif %}
 
 
-{% if book.wallpaper_set.count %}
+{% if book.bookwallpaper_set.count %}
 <h3 class="bridge"><span><em>{{book.title}}</em> Wallpaper</span></h3>
 <div class="entry ui-corner-all grid">
-{% for wall in book.wallpaper_set %}
+{% for wall in book.bookwallpaper_set.all %}
 <div class="wallpaper grid">
-    <img src="{{wall.image|imageblob:220}}" class="wallpaper ui-corner-all shadow" />
-    <div class="tip ui-corner-all shadow">
-        <strong>Pick a size</strong>
-        {% wallpapers wall aspects %}
-    </div>
+    <a href="{{ wall.wallpaper.url }}">
+        <img src="{{ wall.thumbnail.url }}" class="wallpaper ui-corner-all shadow" width="{{ wall.thumbwidth }}" height="{{ wall.thumbheight }}"/>
+        <br />{{ wall.wallwidth }}x{{ wall.wallheight }}</a>
 </div>
 {% endfor %}
 </div>
