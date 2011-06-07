@@ -31,7 +31,7 @@ class BookMediaInline(admin.TabularInline):
 
 class BookWallpaperInline(admin.TabularInline):
     model = BookWallpaper
-    extra = 1
+    extra = 3
     exclude = ["thumbnail", "wallwidth", "wallheight", "thumbwidth", "thumbheight"]
 
 class BookAdmin(admin.ModelAdmin):
