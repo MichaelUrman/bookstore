@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.core.files import File
-from datetime import datetime
+from datetime import datetime, date
 
 # Base models
 class Genre(models.Model):
@@ -93,12 +93,14 @@ class Book(models.Model):
         
     @property
     def is_published(self):
-        return self.publish_date <= datetime.today()
+        return self.publish_date <= date.today()
 
     @property
     def is_free(self):
         return self.price.upper() == "FREE"
 
+    def publications_by_format(self):
+        return self.bookpublication_set.filter(format__visible=True).order_by('format__display_order').all()
 
 class BookReview(models.Model):
     book = models.ForeignKey(Book)
@@ -172,6 +174,15 @@ class BookFormat(models.Model):
     image = models.ImageField(upload_to='bookstore/img/fmt', width_field="width", height_field="height")
     width = models.IntegerField()
     height = models.IntegerField()
+    visible = models.BooleanField(default=True)
 
     def __unicode__(self):
         return "%s (*.%s), %s" % (self.name, self.extension, self.mime)
+
+class BookPublication(models.Model):
+    book = models.ForeignKey(Book)
+    format = models.ForeignKey(BookFormat)
+    data = models.FileField(upload_to='bookstore/ebook/%Y')
+
+    def __unicode__(self):
+        return "%s.%s" % (self.book.title, self.format.extension)

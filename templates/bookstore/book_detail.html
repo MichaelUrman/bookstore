@@ -66,7 +66,7 @@
 
 {% block rightbar %}
 {% if book.is_published %}
-{% if book.publication_set.count %}
+{% if book.bookpublication_set.count %}
 <div class="sale ui-corner-all rightbar">
 {% if book.is_free %}
 <h3>Download <em>{{ book.title }}</em> now for free</h3>
@@ -74,13 +74,14 @@
 <h3>Buy <em>{{ book.title }}</em> now for <span class="price">{{ book.price }}</span></h3>
 <em>Click a format to begin:</em>
 {% endif %}
-<form method="post" action="/buy">{% for format in formats %}{% if format.this_publication %}
-<input type="hidden" name="continue" value="/book/{{book.link}}" />
-<input type="hidden" name="pub" value="{{format.this_publication.key}}" />
-<p><button><image src="/image/format/{{format.key}}"/> {{ format.name }}</button></p>
-{% endif %}{% endfor %}
+<form method="post" action="/buy">
+{% for pub in book.publications_by_format %}
+<input type="hidden" name="continue" value="{{ book.get_absolute_url }}" />
+<input type="hidden" name="pub" value="{{ pub.id }}" />
+<p><button><image src="{{ pub.format.image.url }}" width="{{ pub.format.width }}" height="{{ pub.format.height }}"/> {{ pub.format.name }}</button></p>
+{% endfor %}
 {% if not book.is_free %}
-<img src="/lp/paypal-verified.png" width="128" height="128" alt="PayPal Verified" />
+<img src="/site_media/bookstore/style/paypal-verified.png" width="128" height="128" alt="PayPal Verified" />
 {% endif %}
 </form>
 </div>
