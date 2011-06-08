@@ -66,7 +66,8 @@
 
 {% block rightbar %}
 {% if book.is_published %}
-{% if book.bookpublication_set.count %}
+{% with book.publications_by_format as bookpubs %}
+{% if bookpubs.count %}
 <div class="sale ui-corner-all rightbar">
 {% if book.is_free %}
 <h3>Download <em>{{ book.title }}</em> now for free</h3>
@@ -75,7 +76,7 @@
 <em>Click a format to begin:</em>
 {% endif %}
 <form method="post" action="/buy">
-{% for pub in book.publications_by_format %}
+{% for pub in bookpubs %}
 <input type="hidden" name="continue" value="{{ book.get_absolute_url }}" />
 <input type="hidden" name="pub" value="{{ pub.id }}" />
 <p><button><image src="{{ pub.format.image.url }}" width="{{ pub.format.width }}" height="{{ pub.format.height }}"/> {{ pub.format.name }}</button></p>
@@ -86,15 +87,18 @@
 </form>
 </div>
 {% endif %}
+{% endwith %}
 
-{% if book.booklisting_set.count %}
+{% with book.listings_by_reseller as booklistings %}
+{% if booklistings.count %}
 <div class="sale ui-corner-all rightbar">
 <h3>Order <em>{{ book.title }}</em> in print</h3>
 <em>Click a retailer to begin:</em>
-<p>{% for listing in book.listings_by_reseller %}
-<br /><a href="{{ listing.url }}"><image src="{{ listing.reseller.image.url }}" alt="Buy at {{ listing.reseller.name }}"/></a>
+<p>{% for listing in booklistings %}
+<br /><a href="{{ listing.url }}"><image src="{{ listing.reseller.image.url }}" alt="Buy at {{ listing.reseller.name }}" width="{{ listing.reseller.width }}" height="{{ listing.reseller.height }}"/></a>
 {% endfor %}</p>
 {% endif %}</div>
+{% endwith %}
 {% endif %}
 {% endblock rightbar %}
 
