@@ -90,6 +90,15 @@ class Book(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('bookstore.views.book_detail', (), dict(book_link=self.link))
+        
+    @property
+    def is_published(self):
+        return self.publish_date <= datetime.today()
+
+    @property
+    def is_free(self):
+        return self.price.upper() == "FREE"
+
 
 class BookReview(models.Model):
     book = models.ForeignKey(Book)
@@ -153,3 +162,16 @@ def wallpaper_thumbnail(sender, **kwargs):
     w.thumbnail.save(path.basename(thumbpath), File(data))
     
 post_save.connect(wallpaper_thumbnail, sender=BookWallpaper)
+
+class BookFormat(models.Model):
+    name = models.CharField(max_length=200)
+    blurb = models.CharField(max_length=500)
+    extension = models.SlugField(max_length=10)
+    mime = models.CharField(max_length=100)
+    display_order = models.IntegerField()
+    image = models.ImageField(upload_to='bookstore/img/fmt', width_field="width", height_field="height")
+    width = models.IntegerField()
+    height = models.IntegerField()
+
+    def __unicode__(self):
+        return "%s (*.%s), %s" % (self.name, self.extension, self.mime)

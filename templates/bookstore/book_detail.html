@@ -65,10 +65,10 @@
 
 
 {% block rightbar %}
-{% if book.published %}
+{% if book.is_published %}
 {% if book.publication_set.count %}
 <div class="sale ui-corner-all rightbar">
-{% if book.free %}
+{% if book.is_free %}
 <h3>Download <em>{{ book.title }}</em> now for free</h3>
 {% else %}
 <h3>Buy <em>{{ book.title }}</em> now for <span class="price">{{ book.price }}</span></h3>
@@ -79,7 +79,7 @@
 <input type="hidden" name="pub" value="{{format.this_publication.key}}" />
 <p><button><image src="/image/format/{{format.key}}"/> {{ format.name }}</button></p>
 {% endif %}{% endfor %}
-{% if not book.free %}
+{% if not book.is_free %}
 <img src="/lp/paypal-verified.png" width="128" height="128" alt="PayPal Verified" />
 {% endif %}
 </form>
