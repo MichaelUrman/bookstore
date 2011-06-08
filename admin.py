@@ -1,5 +1,5 @@
 from django.contrib import admin
-from bookstore.models import Genre, Person, Book, BookReview, BookMedia, BookWallpaper, BookFormat, BookPublication
+from bookstore.models import Genre, Person, Book, BookReview, BookMedia, BookWallpaper, BookFormat, BookPublication, BookReseller, BookListing
 
 class GenreAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -61,9 +61,25 @@ class BookPublicationAdmin(admin.ModelAdmin):
         (None, {"fields": ["book", "format", "data"]}),
     ]
     list_display = ("book", "format", "data")
+
+class BookResellerAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {"fields": ["name", "image", "display_order", "visible"]}),
+    ]
+    list_display = ("name", "image", "display_order", "visible")
+    list_editable = ("image", "display_order", "visible")
+
+class BookListingAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {"fields": ["book", "reseller", "url"]}),
+    ]
+    list_display = ("book", "reseller", "url")
+    list_editable = ("url",)
     
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Book, BookAdmin)
 admin.site.register(BookFormat, BookFormatAdmin)
 admin.site.register(BookPublication, BookPublicationAdmin)
+admin.site.register(BookReseller, BookResellerAdmin)
+admin.site.register(BookListing, BookListingAdmin)

@@ -87,12 +87,12 @@
 </div>
 {% endif %}
 
-{% if book.resale_set.count %}
+{% if book.booklisting_set.count %}
 <div class="sale ui-corner-all rightbar">
 <h3>Order <em>{{ book.title }}</em> in print</h3>
 <em>Click a retailer to begin:</em>
-<p>{% for reseller in resellers %}
-{% if reseller.this_resale %}<br /><a href="{{reseller.this_resale.url}}"><image src="/image/reseller/{{reseller.key}}" alt="Buy at {{reseller.name}}"/></a>{% endif %}
+<p>{% for listing in book.listings_by_reseller %}
+<br /><a href="{{ listing.url }}"><image src="{{ listing.reseller.image.url }}" alt="Buy at {{ listing.reseller.name }}"/></a>
 {% endfor %}</p>
 {% endif %}</div>
 {% endif %}

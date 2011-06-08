@@ -102,6 +102,9 @@ class Book(models.Model):
     def publications_by_format(self):
         return self.bookpublication_set.filter(format__visible=True).order_by('format__display_order').all()
 
+    def listings_by_reseller(self):
+        return self.booklisting_set.filter(reseller__visible=True).order_by('reseller__display_order').all()
+
 class BookReview(models.Model):
     book = models.ForeignKey(Book)
     quote = models.TextField()
@@ -185,4 +188,23 @@ class BookPublication(models.Model):
     data = models.FileField(upload_to='bookstore/ebook/%Y')
 
     def __unicode__(self):
-        return "%s.%s" % (self.book.title, self.format.extension)
+        return "%s in %s" % (self.book.title, self.format.name)
+
+class BookReseller(models.Model):
+    name = models.CharField(max_length=200)
+    display_order = models.IntegerField()
+    image = models.ImageField(upload_to='bookstore/img/sell', width_field="width", height_field="height")
+    width = models.IntegerField()
+    height = models.IntegerField()
+    visible = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return self.name
+
+class BookListing(models.Model):
+    book = models.ForeignKey(Book)
+    reseller = models.ForeignKey(BookReseller)
+    url = models.URLField(verify_exists=False)
+
+    def __unicode__(self):
+        return "%s at %s" % (self.book.title, self.reseller.name)
