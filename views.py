@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404
 
-from bookstore.models import Genre, Person, Book
+from bookstore.models import Genre, Person, Book, SiteNewsBanner
 from datetime import datetime
 
 class Pager:
@@ -37,7 +37,8 @@ def readme(request):
     return render_to_response("bookstore/markdown.html", dict(content=html))
 
 def site_news(request):
-    return HttpResponse("<html><body><p>(site news)</p></body></html>")
+    newsbanners = SiteNewsBanner.objects.filter(visible=True).order_by("display_order")
+    return render_to_response("bookstore/site_newsbanner.html", locals())
 
 def site_picks(request):
     return HttpResponse("<html><body><p>(site picks)</p></body></html>")

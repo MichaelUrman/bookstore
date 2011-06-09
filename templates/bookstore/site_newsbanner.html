@@ -1,0 +1,21 @@
+{% extends "bookstore/base.html" %}
+
+{% load bookstore_extras %}
+
+{% block bodyclass %}class="header"{% endblock bodyclass %}
+
+{% block body %}
+<div class="ui-corner-all ui-tabs ui-widget ui-widget-content" id="news">
+    <ul class="ui-helper-hidden">{% for b in newsbanners %}<li><a href="#{{ b.id }}">{{ b.title }}</a></li>{% endfor %}</ul>
+    {% for b in newsbanners %}
+    <div id="{{ b.id }}" class="news ui-tabs-panel ui-widget-content ui-corner-all{% if not forloop.first %} ui-tabs-hide{% endif %}">
+        <img src="{{ b.image.url }}" class="newsimage ui-corner-all shadow" alt="News:" width="{{ b.width }}" height="{{ b.height }}"/>
+        <div class="newsscroll"><div class="newstext">{{ b.text|minifmt|safe }}</div></div>
+    </div>
+    {% endfor %}
+</div{# news #}>
+{% endblock body %}
+
+{% block script %}
+
+{% endblock script %}

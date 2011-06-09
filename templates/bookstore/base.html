@@ -26,7 +26,7 @@
     {% else %}
         <div id="signin"><a href="{{logouturl}}" title="Sign out"><span class="ui-icon ui-icon-power"></span></a></div>
     {% endif %}{% endblock signin %}
-    {% block news %}<iframe id="newspos" src="{% url bookstore.views.site_news %}"></iframe>{% endblock news %}
+    {% block news %}<iframe id="newspos" src="{% url bookstore.views.site_news %}" frameborder="0" scrolling="no"></iframe>{% endblock news %}
 </div>
 {% block search %}
 <form action="http://www.google.com/cse" id="cse-search-box">

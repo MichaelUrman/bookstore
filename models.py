@@ -168,8 +168,8 @@ def wallpaper_thumbnail(sender, **kwargs):
 post_save.connect(wallpaper_thumbnail, sender=BookWallpaper)
 
 class BookFormat(models.Model):
-    name = models.CharField(max_length=200)
-    blurb = models.CharField(max_length=500)
+    name = models.CharField(max_length=200, unique=True)
+    blurb = models.CharField(max_length=500, unique=True)
     extension = models.SlugField(max_length=10)
     mime = models.CharField(max_length=100)
     display_order = models.IntegerField()
@@ -186,11 +186,14 @@ class BookPublication(models.Model):
     format = models.ForeignKey(BookFormat)
     data = models.FileField(upload_to='bookstore/ebook/%Y')
 
+    class Meta:
+        unique_together = ("book", "format")
+
     def __unicode__(self):
         return "%s in %s" % (self.book.title, self.format.name)
 
 class BookReseller(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     display_order = models.IntegerField()
     image = models.ImageField(upload_to='bookstore/img/sell', width_field="width", height_field="height")
     width = models.IntegerField()
@@ -204,6 +207,18 @@ class BookListing(models.Model):
     book = models.ForeignKey(Book)
     reseller = models.ForeignKey(BookReseller)
     url = models.URLField(verify_exists=False)
+    
+    class Meta:
+        unique_together = ("book", "reseller")
 
     def __unicode__(self):
         return "%s at %s" % (self.book.title, self.reseller.name)
+
+class SiteNewsBanner(models.Model):
+    display_order = models.IntegerField("Order", default=100, help_text="Show Banners in this order")
+    visible = models.BooleanField("Visible", default=True, help_text="Show this banner on the site")
+    image = models.ImageField(upload_to='bookstore/img/news', width_field="width", height_field="height")
+    width = models.IntegerField()
+    height = models.IntegerField()
+    title = models.CharField(max_length=500, help_text="Hover text for the image")
+    text = models.TextField(help_text="Text accompanying the image")
