@@ -169,7 +169,7 @@ post_save.connect(wallpaper_thumbnail, sender=BookWallpaper)
 
 class BookFormat(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    blurb = models.CharField(max_length=500, unique=True)
+    blurb = models.CharField(max_length=500)
     extension = models.SlugField(max_length=10)
     mime = models.CharField(max_length=100)
     display_order = models.IntegerField()
