@@ -1,0 +1,6 @@
+<div id="vgenre"> {# list of genres is shown on every page; pulled from admin sorted list #}
+<p>Genres</p>
+  {% for genre in genres %}
+    <a class="genre" href="{{ genre.get_absolute_url }}" title="{{ genre.blurb|escape }}">{{ genre.name }}</a>
+  {% endfor %}
+</div>

@@ -38,8 +38,7 @@ class Person(models.Model):
     editor = models.BooleanField("Is Editor", help_text="Make this person available to be an Editor")
     visible = models.BooleanField("Visible", help_text="Show this author in the store")
     modified = models.DateField(auto_now=True)
-    
-    # sales = db.IntegerProperty()
+    rank = models.FloatField(default=0.0)
     
     def __unicode__(self):
         return "%s, %s <%s>" % (self.lastname, self.firstname, self.email)

@@ -1,6 +1,9 @@
 from django.utils.http import urlquote
 from django import template
+from django.template import Context
 register = template.Library()
+
+from bookstore.models import Genre, Person
 
 import datetime
 today = datetime.date.today
@@ -51,14 +54,6 @@ def minifmt(s, _wiki_rules=_wiki_rules):
 minifmt.is_safe = True
 
 @register.filter
-def bookpublished(book):
-    return book.publish_date >= today()
-    
-@register.filter
-def purchaseexpired(purchase):
-    return purchase.date + oneday < now()
-
-@register.filter
 def timespan(value):
     seconds = value.seconds
     minutes, seconds = divmod(seconds, 60)
@@ -86,10 +81,6 @@ def youtube(value, size):
 def chain(value, next):
     for v in value: yield v
     for v in next: yield v
-    
-@register.filter
-def imageblob(value, size=None):
-    return get_serving_url(str(value.key()), size and int(size))
     
 @register.filter
 def ppattrs(value, name=None):
@@ -143,7 +134,17 @@ def fblike(link):
 @register.simple_tag
 def fbrec(link, refkind, ref):
     return """<iframe class="ui-corner-all feature center rightbar" id="fbr" src="http://www.facebook.com/plugins/recommendations.php?site=""" + urlquote(link, safe="") + """&amp;width=155&amp;height=500&amp;header=true&amp;colorscheme=light&amp;font=trebuchet+ms&amp;border_color=%23000&amp;ref=""" + urlquote(refkind, safe="") + "%3A" + urlquote(ref, safe="") + """" scrolling="no" frameborder="0" allowTransparency="true"></iframe>"""
-        
+
+@register.simple_tag
+def genre_sidebar():
+    t = template.loader.get_template('bookstore/genre_sidebar.html')
+    return t.render(Context({'genres': Genre.objects.order_by("display_order")}))
+
+@register.simple_tag
+def author_sidebar():
+    t = template.loader.get_template('bookstore/author_sidebar.html')
+    return t.render(Context({'authors': Person.objects.filter(author=True, visible=True).order_by('-rank')[:6]}))
+
 @register.tag
 def bookcard(parser, token):
     try:
@@ -159,4 +160,4 @@ class FormatBookCardNode(template.Node):
     def render(self, context):
         book = self.book_reference.resolve(context)
         t = template.loader.get_template('bookstore/book_summary.html')
-        return t.render(context.__class__({'book': book}, autoescape=context.autoescape))
+        return t.render(Context({'book': book}, autoescape=context.autoescape))
