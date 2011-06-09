@@ -1,7 +1,7 @@
 # bookstore views
 from django.http import HttpResponse
 from django.utils.html import escape, linebreaks
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from bookstore.models import Genre, Person, Book, SiteNewsBanner
 from datetime import datetime
@@ -47,7 +47,9 @@ def author_list(request):
     return HttpResponse("TODO: not yet...")
 
 def author_detail(request, author_link):
-    author = get_object_or_404(Person, link=author_link)
+    author = get_object_or_404(Person, link__iexact=author_link)
+    if author.link != author_link:
+        return redirect(author, permanent=True)
     bookpager = Pager(request, 100)
     books = author.book_set.filter(visible=True).filter(publish_date__lte=datetime.now)
     link = request.build_absolute_uri()
@@ -57,14 +59,18 @@ def book_list(request):
     return HttpResponse("TODO: not yet...")
 
 def book_detail(request, book_link):
-    book = get_object_or_404(Book, link=book_link)
+    book = get_object_or_404(Book, link__iexact=book_link)
+    if book.link != book_link:
+        return redirect(book, permanent=True)
     return render_to_response("bookstore/book_detail.html", dict(book=book, link=request.build_absolute_uri()))
 
 def genre_list(request):
     return HttpResponse("TODO: not yet...")
 
 def genre_detail(request, genre_link):
-    genre = get_object_or_404(Genre, link=genre_link)
+    genre = get_object_or_404(Genre, link__iexact=genre_link)
+    if genre.link != genre_link:
+        return redirect(genre, permanent=True)
     bookpager = Pager(request, 100)
     books = genre.book_set.filter(visible=True).filter(publish_date__lte=datetime.now)
     link = request.build_absolute_uri()
