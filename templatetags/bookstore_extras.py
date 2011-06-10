@@ -138,7 +138,7 @@ def fbrec(link, refkind, ref):
 @register.simple_tag
 def genre_sidebar():
     t = template.loader.get_template('bookstore/genre_sidebar.html')
-    return t.render(Context({'genres': Genre.objects.order_by("display_order")}))
+    return t.render(Context({'genres': Genre.objects.filter(visible=True).order_by("display_order")}))
 
 @register.simple_tag
 def author_sidebar():

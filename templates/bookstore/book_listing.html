@@ -1,0 +1,23 @@
+{% extends "bookstore/base.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}All Books - {{ block.super }}{% endblock %}
+
+{% block content %}
+<h3 class="entry ui-corner-all">Books of Lillibridge Press</h3>
+{% for book in books %}
+{% ifchanged book.title|first %}
+{% if not forloop.first %}
+</div>
+{% endif %}
+<h3 class="bridge"><span>{{ book.title|first|upper }}</span></h3>
+<div class="entry grid ui-corner-all">
+{% endifchanged %}
+{% bookcard book %}
+{% if forloop.last %}
+</div>
+{% endif %}
+{% endfor %}
+{% pager bookpager %}
+{% endblock content %}

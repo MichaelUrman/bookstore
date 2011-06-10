@@ -1,0 +1,22 @@
+{% extends "bookstore/base.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}Genres - {{ block.super }}{% endblock %}
+
+{% block content %}
+<h3 class="entry ui-corner-all">Genres of Lillibridge Press</h3>
+{% for genre in genres %}
+{% comment %}
+{% ifchanged author.lastname|first %}
+<h3 class="bridge"><span>{{ author.lastname|first|upper }}</span></h3>
+{% endifchanged %}
+{% endcomment %}
+<div class="entry genre list ui-corner-all">
+<h3><a href="{{ genre.get_absolute_url }}">{{ genre.name }}</a></h3>
+<p>{{ genre.description|minifmt|truncatewords_html:30 }}</p>
+<p class="more right"><a href="{{ genre.get_absolute_url }}">See {{ genre.name }} books...</a></p>
+</div>
+{% endfor %}
+{% pager genrepager %}
+{% endblock content %}

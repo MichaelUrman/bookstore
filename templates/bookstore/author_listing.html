@@ -1,0 +1,20 @@
+{% extends "bookstore/base.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}Authors - {{ block.super }}{% endblock %}
+
+{% block content %}
+<h3 class="entry ui-corner-all">Authors of Lillibridge Press</h3>
+{% for author in authors %}
+{% ifchanged author.lastname|first %}
+<h3 class="bridge"><span>{{ author.lastname|first|upper }}</span></h3>
+{% endifchanged %}
+<div class="entry author list ui-corner-all">
+<h3><a href="{{ author.get_absolute_url }}">{{ author.firstname }} {{ author.lastname }}</a></h3>
+<p>{{ author.biography|minifmt|truncatewords_html:30 }}</p>
+<p class="more right"><a href="{{ author.get_absolute_url }}">(Read More...)</a></p>
+</div>
+{% endfor %}
+{% pager authorpager %}
+{% endblock content %}

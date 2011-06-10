@@ -3,5 +3,5 @@
   {% for author in authors %}
     <a class="author" href="{{ author.get_absolute_url }}">{{ author.firstname }} {{ author.lastname }}</a>
   {% endfor %}
-  <a href="/author" class="author more" title="Browse all of our authors">See more...</a>
+  <a href="{% url bookstore.views.author_list %}" class="author more" title="Browse all of our authors">See more...</a>
 </div>
