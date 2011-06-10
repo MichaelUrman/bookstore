@@ -3,6 +3,9 @@ from django.db.models.signals import post_save
 from django.core.files import File
 from datetime import datetime, date
 
+# TODO:
+# consider dijit.Editor instead of minifmt: http://lazutkin.com/blog/2011/mar/13/using-dojo-rich-editor-djangos-admin/
+
 # Base models
 class Genre(models.Model):
     link = models.SlugField("Genre Link", max_length=200, unique=True, help_text="Address: /genre/[LINK]")

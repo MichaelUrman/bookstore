@@ -2,7 +2,7 @@
 
 {% load bookstore_extras %}
 
-{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+{% block title %}{{ genre.name }} - {{ block.super }}{% endblock %}
 {% block metakeywords %}{% if author.metakeywords %}{{ author.metakeywords }}{% else %}{{block.super}}{% endif %}{% endblock %}
 {% block metadescription %}{% if author.metadescription %}{{ author.metadescription }}{% else %}{{block.super}}{% endif %}{% endblock %}
 
