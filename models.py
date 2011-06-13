@@ -225,3 +225,15 @@ class SiteNewsBanner(models.Model):
     height = models.IntegerField()
     title = models.CharField(max_length=500, help_text="Hover text for the image")
     text = models.TextField(help_text="Text accompanying the image")
+
+class StorefrontNewsCard(models.Model):
+    display_order = models.IntegerField("Order", default=100, help_text="Show news cards in this order")
+    visible = models.BooleanField("Visible", default=True, help_text="Show this news card")
+    image = models.ImageField(upload_to='bookstore/img/card', width_field="width", height_field="height")
+    width = models.IntegerField()
+    height = models.IntegerField()
+    link = models.URLField(verify_exists=False)
+    description = models.TextField(help_text="Text for those who don't see the image")
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.description, self.link)

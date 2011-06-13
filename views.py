@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
-from bookstore.models import Genre, Person, Book, SiteNewsBanner
+from bookstore.models import Genre, Person, Book, SiteNewsBanner, StorefrontNewsCard
 from datetime import datetime
 
 class Pager:
@@ -24,7 +24,8 @@ class Pager:
         self.prev = (page > 0) and ("?p=%s" % (page - 1) + sizer) or ""
 
 def storefront(request):
-    return render_to_response("bookstore/storefront.html")
+    cards = StorefrontNewsCard.objects.filter(visible=True).order_by("display_order")
+    return render_to_response("bookstore/storefront.html", locals())
     
 def readme(request):
     from os import path
