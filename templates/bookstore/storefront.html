@@ -26,7 +26,7 @@
     {% for card in cards %}
     <div id="card{{ card.id }}" class="card ui-corner-all ui-tabs-panel ui-widget-content{% if not forloop.first %} ui-tabs-hide{% endif %}">
         <a href="{{ card.link }}">
-            <img src="{{ card.image.url }}" class="card ui-corner-all" alt="{{ card.description }}" />
+            <img src="{{ card.image.url }}" class="card ui-corner-all" alt="{{ card.description }}" width="{{ card.width }}" height="{{ card.height }}"/>
         </a>
     </div>
     {% endfor %}
@@ -34,21 +34,21 @@
 {% endif %}
 
 <div class="ui-corner-all bshadow adflash">
-<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" id="Player_23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96"  WIDTH="600px" HEIGHT="200px"> <PARAM NAME="movie" VALUE="http://ws.amazon.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&ID=V20070822%2FUS%2Fwwwlillibridg-20%2F8010%2F23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96&Operation=GetDisplayTemplate"><PARAM NAME="quality" VALUE="high"><PARAM NAME="bgcolor" VALUE="#FFFFFF"><PARAM NAME="allowscriptaccess" VALUE="always"><embed src="http://ws.amazon.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&ID=V20070822%2FUS%2Fwwwlillibridg-20%2F8010%2F23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96&Operation=GetDisplayTemplate" id="Player_23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96" quality="high" bgcolor="#ffffff" name="Player_23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96" allowscriptaccess="always"  type="application/x-shockwave-flash" align="middle" height="200px" width="600px"></embed></OBJECT> <NOSCRIPT><A HREF="http://ws.amazon.com/widgets/q?ServiceVersion=20070822&MarketPlace=US&ID=V20070822%2FUS%2Fwwwlillibridg-20%2F8010%2F23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96&Operation=NoScript">Amazon.com Widgets</A></NOSCRIPT>
+<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" id="Player_23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96"  width="600px" height="200px"> <param name="movie" value="http://ws.amazon.com/widgets/q?ServiceVersion=20070822&amp;MarketPlace=US&amp;ID=V20070822%2FUS%2Fwwwlillibridg-20%2F8010%2F23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96&amp;Operation=GetDisplayTemplate" /><param name="quality" value="high" /><param name="bgcolor" value="#FFFFFF" /><param name="allowscriptaccess" value="always" /><embed src="http://ws.amazon.com/widgets/q?ServiceVersion=20070822&amp;MarketPlace=US&amp;ID=V20070822%2FUS%2Fwwwlillibridg-20%2F8010%2F23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96&amp;Operation=GetDisplayTemplate" id="Player_23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96" quality="high" bgcolor="#ffffff" name="Player_23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96" allowscriptaccess="always" type="application/x-shockwave-flash" align="middle" height="200px" width="600px"></embed></object> <noscript><a href="http://ws.amazon.com/widgets/q?ServiceVersion=20070822&amp;MarketPlace=US&amp;ID=V20070822%2FUS%2Fwwwlillibridg-20%2F8010%2F23ea2c4f-425e-4dac-ad77-b0fe4c2f6f96&amp;Operation=NoScript">Amazon.com Widgets</a></noscript>
 </div>
 
-{% for ad in midads %}
-<div class="ui-corner-all bshadow adimage">{% if ad.link %}<a href="{{ad.link}}">{% endif %}
-<img class="ui-corner-all" src="/image/{{ad.image.key}}" alt="{{ad.description}}"></img>
+{% for ad in center_ads %}
+<div class="ui-corner-all bshadow adimage">{% if ad.link %}<a href="{{ ad.link }}">{% endif %}
+<img class="ui-corner-all" src="{{ ad.image.url }}" alt="{{ ad.description }}"  width="{{ ad.width }}" height="{{ ad.height }}"></img>
 {% if ad.link %}</a>{% endif %}</div>
 {% endfor %}
 
 {% endblock content %}
 
 {% block leftbar %}{{block.super}}
-{% for ad in leftads %}
-<div class="ui-corner-all bshadow adimage">{% if ad.link %}<a href="{{ad.link}}">{% endif %}
-<img class="ui-corner-all" src="/image/{{ad.image.key}}" alt="{{ad.description}}"></img>
+{% for ad in left_ads %}
+<div class="ui-corner-all bshadow adimage">{% if ad.link %}<a href="{{ ad.link }}">{% endif %}
+<img class="ui-corner-all" src="{{ ad.image.url }}" alt="{{ ad.description }}" width="{{ ad.width }}" height="{{ ad.height }}"></img>
 {% if ad.link %}</a>{% endif %}</div>
 {% endfor %}
 {% endblock leftbar %}
@@ -57,7 +57,14 @@
 <div class="ui-corner-all feature center rightbar" id="fbd">
 <iframe class="ui-corner-all feature center rightbar" id="fblb" src="http://www.facebook.com/plugins/likebox.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FLillibridge-Press%2F122314562983&amp;width=155&amp;colorscheme=none&amp;show_faces=true&amp;stream=false&amp;header=false&amp;height=280" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
 </div>
-{{block.super}}{% endblock rightbar %}
+{{block.super}}
+
+{% for ad in right_ads %}
+<div class="ui-corner-all adimage">{% if ad.link %}<a href="{{ ad.link }}">{% endif %}
+<img class="ui-corner-all" src="{{ ad.image.url }}" alt="{{ ad.description }}" width="{{ ad.width }}" height="{{ ad.height }}"></img>
+{% if ad.link %}</a>{% endif %}</div>
+{% endfor %}
+{% endblock rightbar %}
 
 {% block onready %}{{block.super}}
 $("#cards").tabs().tabs("rotate", 5000, true).tabs("option", "fx", { opacity: "toggle" });

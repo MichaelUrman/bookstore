@@ -237,3 +237,20 @@ class StorefrontNewsCard(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.description, self.link)
+
+class StorefrontAd(models.Model):
+    display_order = models.IntegerField("Order", default=100, help_text="Show ads in this order")
+    visible = models.BooleanField("Visible", default=True, help_text="Show this ad")
+    image = models.ImageField(upload_to='bookstore/img/ad', width_field="width", height_field="height")
+    width = models.IntegerField()
+    height = models.IntegerField()
+    link = models.URLField(verify_exists=False)
+    column = models.CharField(max_length=5, choices=(
+        ('L', 'Left (165 px wide)'),
+        ('C', 'Center (600 px wide)'),
+        ('R', 'Right (125 or 137 px wide)'),
+    ))
+    description = models.TextField(help_text="Text for those who don't see the image")
+
+    def __unicode__(self):
+        return "%s [%s] (%s)" % (self.description, self.column, self.link)

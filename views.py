@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
-from bookstore.models import Genre, Person, Book, SiteNewsBanner, StorefrontNewsCard
+from bookstore.models import Genre, Person, Book, SiteNewsBanner, StorefrontNewsCard, StorefrontAd
 from datetime import datetime
 
 class Pager:
@@ -25,6 +25,10 @@ class Pager:
 
 def storefront(request):
     cards = StorefrontNewsCard.objects.filter(visible=True).order_by("display_order")
+    all_ads = StorefrontAd.objects.filter(visible=True).order_by("display_order")
+    left_ads = all_ads.filter(column="L")
+    center_ads = all_ads.filter(column="C")
+    right_ads = all_ads.filter(column="R")
     return render_to_response("bookstore/storefront.html", locals())
     
 def readme(request):
