@@ -250,7 +250,7 @@ class SiteNewsBanner(models.Model):
 
 class SitePage(models.Model):
     link = models.SlugField("Page Link", max_length=200, blank=True, unique=True, help_text="Page: /[LINK]; a blank one is used for the front page")
-    title = models.CharField(max_length=50, blank=True, unique=True, help_text="Page title, used for page title (except on front page) and tab")
+    title = models.CharField(max_length=50, unique=True, help_text="Page title, used for page title (except on front page) and tab")
     metakeywords = models.TextField("Page Keywords", blank=True, help_text="Leave empty to use defaults")
     metadescription = models.TextField("Page Description", blank=True, help_text="Leave empty to use defaults")
     content = models.TextField()
