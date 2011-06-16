@@ -91,8 +91,8 @@ class SitePageAdmin(admin.ModelAdmin):
         ("Display", {"fields": ["content", "display_order", "visible"]}),
         ("SEO", {"fields": ["metakeywords", "metadescription"]}),
     ]
-    list_display = ("title", "link", "display_order", "visible")
-    list_editable = ("link", "display_order", "visible")
+    list_display = ("title", "link", "display_order", "visible", "frontpage")
+    list_editable = ("link", "display_order", "visible", "frontpage")
     prepopulated_fields = {"link": ("title",)}
 
 class StorefrontNewsCardAdmin(admin.ModelAdmin):

@@ -31,7 +31,10 @@ def storefront(request):
     left_ads = all_ads.filter(column="L")
     center_ads = all_ads.filter(column="C")
     right_ads = all_ads.filter(column="R")
-    site = SitePage.objects.get(link="")
+    try:
+        site = SitePage.objects.get(frontpage=True)
+    except SitePage.DoesNotExist:
+        pass
     return render_to_response("bookstore/storefront.html", locals())
     
 def site_page(request, page_link):

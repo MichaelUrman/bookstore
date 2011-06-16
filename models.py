@@ -249,12 +249,13 @@ class SiteNewsBanner(models.Model):
         ordering = ["display_order"]
 
 class SitePage(models.Model):
-    link = models.SlugField("Page Link", max_length=200, blank=True, unique=True, help_text="Page: /[LINK]; a blank one is used for the front page")
+    link = models.SlugField("Page Link", max_length=200, unique=True, help_text="Page: /[LINK]")
     title = models.CharField(max_length=50, unique=True, help_text="Page title, used for page title (except on front page) and tab")
     metakeywords = models.TextField("Page Keywords", blank=True, help_text="Leave empty to use defaults")
     metadescription = models.TextField("Page Description", blank=True, help_text="Leave empty to use defaults")
     content = models.TextField()
     visible = models.BooleanField(default=True, help_text="Allow page to be loaded")
+    frontpage = models.BooleanField(default=False, help_text="Use as front page; select this for only one page")
     display_order = models.IntegerField("Order", default=100, help_text="Show page links in this order; 0 or negative numbers to hide")
 
     class Meta:
@@ -265,10 +266,10 @@ class SitePage(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        if self.link:
-            return ('bookstore.views.site_page', (), dict(page_link=self.link))
-        else:
+        if self.frontpage:
             return ('bookstore.views.storefront', (), {})
+        else:
+            return ('bookstore.views.site_page', (), dict(page_link=self.link))
 
 class StorefrontNewsCard(models.Model):
     display_order = models.IntegerField("Order", default=100, help_text="Show news cards in this order")
