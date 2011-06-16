@@ -3,8 +3,10 @@ from django.http import HttpResponse
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
-from bookstore.models import Genre, Person, Book, SiteNewsBanner, StorefrontNewsCard, StorefrontAd
+from bookstore.models import Genre, Person, Book, SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from datetime import datetime
+
+# HG mail: http://lillibridgepress.com:2096
 
 class Pager:
     def __init__(self, request, count, pagesize=12):
@@ -29,7 +31,14 @@ def storefront(request):
     left_ads = all_ads.filter(column="L")
     center_ads = all_ads.filter(column="C")
     right_ads = all_ads.filter(column="R")
+    site = SitePage.objects.get(link="")
     return render_to_response("bookstore/storefront.html", locals())
+    
+def site_page(request, page_link):
+    page = get_object_or_404(SitePage, link__iexact=page_link, visible=True)
+    if page.link != page_link:
+        return redirect(page, permanent=True)
+    return render_to_response("bookstore/site_page.html", locals())
     
 def readme(request):
     from os import path

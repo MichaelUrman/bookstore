@@ -1,0 +1,11 @@
+{% extends "bookstore/base.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}{{ page.title }} - {{ block.super }}{% endblock %}
+{% block metakeywords %}{% if page.keywords %}{{ page.keywords }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block metadescription %}{% if page.description %}{{ page.description }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all">{{ page.content|minifmt|safe }}</div>
+{% endblock content %}

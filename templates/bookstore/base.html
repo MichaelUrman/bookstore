@@ -38,15 +38,7 @@
 </div>
 </form>
 {% endblock search %}
-<div id="navbar">{% block navitems %}
-    <a class="ui-corner-bottom" href="/">Home</a>
-    <a class="ui-corner-bottom" href="/our_story">Our&nbsp;Story</a>
-    <a class="ui-corner-bottom" href="/about_us">About&nbsp;Us</a>
-    <a class="ui-corner-bottom" href="/about_ebooks">About&nbsp;eBooks</a>
-    <a class="ui-corner-bottom" href="/links">Links</a>
-    <a class="ui-corner-bottom" href="/submissions">Submissions</a>
-    {% endblock navitems %}
-</div>
+<div id="navbar">{% block navitems %}{% site_pagenav %}{% endblock navitems %}</div>
 
 <div id="ct">
 <div id="body">{% block content %}{% endblock %}</div>

@@ -11,4 +11,5 @@ urlpatterns = patterns('bookstore.views',
     (r'^book/(?P<book_link>[\w-]+)$', 'book_detail'),
     (r'^genre/$', 'genre_list'),
     (r'^genre/(?P<genre_link>[\w-]+)$', 'genre_detail'),
+    (r'^(?P<page_link>[\w-]+)$', 'site_page'),
 )

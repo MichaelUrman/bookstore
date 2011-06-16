@@ -7,15 +7,7 @@
 
 {% block content %}
 <div class="entry ui-corner-all" id="welcome">
-    {# home header: welcome message, populated by a list with adjoining picture #}
-    <p>Welcome to Lillibridge Press. We are primarily an eBook publishing company 
-    specializing in speculative genre fiction for the discerning reader. Whether you have an 
-    hour for a short story, or several for a novelette, novella, or novel, Lillibridge Press 
-    is your immediate source for high-quality genre literature. As connoisseurs of the 
-    fantasy, science fiction, and horror genres, we are committed to bringing you innovative 
-    and thrilling adventures via the imaginative minds of today's most talented authors. 
-    Browse our current selection using the links in the left column, or check out our newest 
-    release below!</p>
+{{ site.content|minifmt|safe }}
 </div>
 
 {% if cards %}

@@ -21,6 +21,9 @@ class Genre(models.Model):
     metadescription = models.TextField("Page Description", blank=True)
     modified = models.DateField(auto_now=True)
 
+    class Meta:
+        ordering = ["display_order"]
+
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.link)
 
@@ -43,6 +46,10 @@ class Person(models.Model):
     modified = models.DateField(auto_now=True)
     rank = models.FloatField(default=0.0)
     
+    class Meta:
+        ordering = ["lastname", "firstname"]
+        verbose_name_plural = "People"
+
     def __unicode__(self):
         return "%s, %s <%s>" % (self.lastname, self.firstname, self.email)
 
@@ -86,6 +93,9 @@ class Book(models.Model):
     feature = models.BooleanField(default=False, help_text="Include this book as a potential featured item")
     bestseller = models.BooleanField(default=False, help_text="Include this book as a potential bestseller")
 
+    class Meta:
+        ordering = ["-added_date"]
+
     def __unicode__(self):
         return "%s, a %s (%s)" % (self.title, self.size, self.link)
 
@@ -112,6 +122,9 @@ class BookReview(models.Model):
     quote = models.TextField()
     reviewer = models.TextField()
     date = models.DateField()
+
+    class Meta:
+        ordering = ["-date"]
 
     def __unicode__(self):
         return "%s by %s on %s" % (self.book.title, self.reviewer, self.date)
@@ -181,6 +194,9 @@ class BookFormat(models.Model):
     height = models.IntegerField()
     visible = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ["display_order"]
+
     def __unicode__(self):
         return "%s (*.%s), %s" % (self.name, self.extension, self.mime)
 
@@ -202,6 +218,9 @@ class BookReseller(models.Model):
     width = models.IntegerField()
     height = models.IntegerField()
     visible = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order"]
 
     def __unicode__(self):
         return self.name
@@ -225,6 +244,31 @@ class SiteNewsBanner(models.Model):
     height = models.IntegerField()
     title = models.CharField(max_length=500, help_text="Hover text for the image")
     text = models.TextField(help_text="Text accompanying the image")
+    
+    class Meta:
+        ordering = ["display_order"]
+
+class SitePage(models.Model):
+    link = models.SlugField("Page Link", max_length=200, blank=True, unique=True, help_text="Page: /[LINK]; a blank one is used for the front page")
+    title = models.CharField(max_length=50, blank=True, unique=True, help_text="Page title, used for page title (except on front page) and tab")
+    metakeywords = models.TextField("Page Keywords", blank=True, help_text="Leave empty to use defaults")
+    metadescription = models.TextField("Page Description", blank=True, help_text="Leave empty to use defaults")
+    content = models.TextField()
+    visible = models.BooleanField(default=True, help_text="Allow page to be loaded")
+    display_order = models.IntegerField("Order", default=100, help_text="Show page links in this order; 0 or negative numbers to hide")
+
+    class Meta:
+        ordering = ["display_order"]
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.title, self.link)
+
+    @models.permalink
+    def get_absolute_url(self):
+        if self.link:
+            return ('bookstore.views.site_page', (), dict(page_link=self.link))
+        else:
+            return ('bookstore.views.storefront', (), {})
 
 class StorefrontNewsCard(models.Model):
     display_order = models.IntegerField("Order", default=100, help_text="Show news cards in this order")
@@ -234,6 +278,9 @@ class StorefrontNewsCard(models.Model):
     height = models.IntegerField()
     link = models.URLField(verify_exists=False)
     description = models.TextField(help_text="Text for those who don't see the image")
+
+    class Meta:
+        ordering = ["display_order"]
 
     def __unicode__(self):
         return "%s (%s)" % (self.description, self.link)
@@ -251,6 +298,9 @@ class StorefrontAd(models.Model):
         ('R', 'Right (125 or 137 px wide)'),
     ))
     description = models.TextField(help_text="Text for those who don't see the image")
+
+    class Meta:
+        ordering = ["display_order"]
 
     def __unicode__(self):
         return "%s [%s] (%s)" % (self.description, self.column, self.link)

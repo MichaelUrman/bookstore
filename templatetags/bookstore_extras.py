@@ -3,7 +3,7 @@ from django import template
 from django.template import Context
 register = template.Library()
 
-from bookstore.models import Genre, Person
+from bookstore.models import Genre, Person, SitePage
 
 import datetime
 today = datetime.date.today
@@ -144,6 +144,11 @@ def genre_sidebar():
 def author_sidebar():
     t = template.loader.get_template('bookstore/author_sidebar.html')
     return t.render(Context({'authors': Person.objects.filter(author=True, visible=True).order_by('-rank')[:6]}))
+
+@register.simple_tag
+def site_pagenav():
+    t = template.loader.get_template('bookstore/site_pagenav.html')
+    return t.render(Context({'pages': SitePage.objects.filter(visible=True, display_order__gt=0).order_by('display_order')}))
 
 @register.tag
 def bookcard(parser, token):
