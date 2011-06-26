@@ -38,7 +38,7 @@
 </div>
 </form>
 {% endblock search %}
-<div id="navbar">{% block navitems %}{% site_pagenav %}{% endblock navitems %}</div>
+<div id="navbar">{% block navitems %}{% site_headnav %}{% endblock navitems %}</div>
 
 <div id="ct">
 <div id="body">{% block content %}{% endblock %}</div>
@@ -51,13 +51,7 @@
 </div{##ct#}>
 
 <div id="footer" class="ui-corner-all bshadow">{% block footer %}
-    <a href="/">Home</a>
-    | <a href="/our_story">Our&nbsp;Story</a> 
-    | <a href="/about_us">About&nbsp;Us</a> 
-    | <a href="/about_ebooks">About&nbsp;eBooks</a> 
-    | <a href="/links">Links</a> 
-    | <a href="/submissions">Submissions</a> 
-    | <a href="/contact">Contact</a>
+    {% site_footnav %}
     <br />
     &#x2756; Copyright &copy; Lillibridge Press &#x2756; All Rights Reserved &#x2756;
 {% endblock footer %}</div{# id="footer"#}>

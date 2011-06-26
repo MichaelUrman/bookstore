@@ -146,9 +146,14 @@ def author_sidebar():
     return t.render(Context({'authors': Person.objects.filter(author=True, visible=True).order_by('-rank')[:6]}))
 
 @register.simple_tag
-def site_pagenav():
-    t = template.loader.get_template('bookstore/site_pagenav.html')
-    return t.render(Context({'pages': SitePage.objects.filter(visible=True, display_order__gt=0).order_by('display_order')}))
+def site_headnav():
+    t = template.loader.get_template('bookstore/site_headnav.html')
+    return t.render(Context({'pages': SitePage.objects.filter(visible=True, showinheader=True).order_by('display_order')}))
+
+@register.simple_tag
+def site_footnav():
+    t = template.loader.get_template('bookstore/site_footnav.html')
+    return t.render(Context({'pages': SitePage.objects.filter(visible=True, showinfooter=True).order_by('display_order')}))
 
 @register.tag
 def bookcard(parser, token):

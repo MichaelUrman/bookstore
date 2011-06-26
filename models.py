@@ -255,8 +255,10 @@ class SitePage(models.Model):
     metadescription = models.TextField("Page Description", blank=True, help_text="Leave empty to use defaults")
     content = models.TextField()
     visible = models.BooleanField(default=True, help_text="Allow page to be loaded")
+    showinheader = models.BooleanField(default=True, help_text="Show page in tabs at top")
+    showinfooter = models.BooleanField(default=True, help_text="Show page in list at bottom")
     frontpage = models.BooleanField(default=False, help_text="Use as front page; select this for only one page")
-    display_order = models.IntegerField("Order", default=100, help_text="Show page links in this order; 0 or negative numbers to hide")
+    display_order = models.IntegerField("Order", default=100, help_text="Show page links in this order")
 
     class Meta:
         ordering = ["display_order"]

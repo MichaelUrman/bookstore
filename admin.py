@@ -88,11 +88,11 @@ class SiteNewsBannerAdmin(admin.ModelAdmin):
 class SitePageAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {"fields": ["title", "link",]}),
-        ("Display", {"fields": ["content", "display_order", "visible"]}),
+        ("Display", {"fields": ["content", "display_order", "showinheader", "showinfooter", "visible"]}),
         ("SEO", {"fields": ["metakeywords", "metadescription"]}),
     ]
-    list_display = ("title", "link", "display_order", "visible", "frontpage")
-    list_editable = ("link", "display_order", "visible", "frontpage")
+    list_display = ("title", "link", "display_order", "showinheader", "showinfooter", "visible", "frontpage")
+    list_editable = ("link", "display_order", "showinheader", "showinfooter", "visible", "frontpage")
     prepopulated_fields = {"link": ("title",)}
 
 class StorefrontNewsCardAdmin(admin.ModelAdmin):
