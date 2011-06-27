@@ -59,8 +59,8 @@ class Person(models.Model):
 
 class Book(models.Model):
     link = models.SlugField("Book Link", max_length=200, unique=True, help_text="Book: /book/[LINK]")
-    isbn = models.SlugField("ISBN", max_length=50, blank=True, help_text="ISBN, if available")
-    lbpn = models.SlugField("LBPN", max_length=50, blank=True, help_text="LBPN, if available")
+    isbn = models.CharField("ISBN", max_length=50, blank=True, help_text="ISBN, if available")
+    lbpn = models.CharField("LBPN", max_length=50, blank=True, help_text="LBPN, if available")
     size = models.CharField("Size", max_length=50, choices=(
         ('Free Read', 'Free Read'),
         ('Short Fiction', 'Short Fiction (2,500 to 7,500 words)'),
