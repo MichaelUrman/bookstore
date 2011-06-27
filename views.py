@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from bookstore.models import Genre, Person, Book, SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from datetime import datetime
+from random import choice
 
 # HG mail: http://lillibridgepress.com:2096
 
@@ -66,8 +67,14 @@ def site_news(request):
     newsbanners = SiteNewsBanner.objects.filter(visible=True).order_by("display_order")
     return render_to_response("bookstore/site_newsbanner.html", locals())
 
+def choose(qs, choice=choice):
+    if not qs: return None
+    return choice(qs)
+
 def site_picks(request):
-    return HttpResponse("<html><body><p>(site picks)</p></body></html>")
+    bestseller = choose(Book.objects.filter(visible=True, bestseller=True))
+    feature = choose(Book.objects.filter(visible=True, feature=True).exclude(link__exact=bestseller.link))
+    return render_to_response("bookstore/site_picks.html", locals())
 
 def author_list(request):
     all_authors = Person.objects.filter(visible=True, author=True).order_by("lastname", "firstname")

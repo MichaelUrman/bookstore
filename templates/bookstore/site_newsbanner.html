@@ -2,7 +2,9 @@
 
 {% load bookstore_extras %}
 
-{% block bodyclass %}class="header"{% endblock bodyclass %}
+{% block htmlhead%}{{ block.super }}<base target="_parent"/>{% endblock htmlhead %}
+{% block htmlclass %}class="embed"{% endblock htmlclass %}
+{% block bodyclass %}class="embed"{% endblock bodyclass %}
 
 {% block body %}
 <div class="ui-corner-all ui-tabs ui-widget ui-widget-content" id="news">

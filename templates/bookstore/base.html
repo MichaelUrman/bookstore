@@ -45,7 +45,7 @@
 <div id="left">{% block leftbar %}<div id="sidebar" class="ui-corner-all bshadow">{% block sidebar %}{% genre_sidebar %}{% author_sidebar %}{% endblock sidebar %}</div{#sidebar#}>{% endblock leftbar %}</div{#left#}>
 <div id="right"><div id="rightbar" class="ui-corner-all">
 {% block rightbar %}
-<iframe class="feature rightbar" src="{% url bookstore.views.site_picks %}"></iframe>
+<iframe class="feature rightbar" src="{% url bookstore.views.site_picks %}" width="155" height="580" allowtransparency="true" frameborder="0" scrolling="no"></iframe>
 {% endblock rightbar %}
 </div{#rightbar#}></div{#right#}>
 </div{##ct#}>
