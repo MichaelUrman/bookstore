@@ -36,6 +36,14 @@ def storefront(request):
     except SitePage.DoesNotExist:
         pass
     return render_to_response("bookstore/storefront.html", locals())
+
+def sitemap(request):
+    published_books = Book.objects.filter(visible=True, publish_date__lte=datetime.now).order_by("-publish_date")
+    upcoming_books = Book.objects.filter(visible=True, publish_date__gt=datetime.now).order_by("publish_date")
+    authors = Person.objects.filter(visible=True, author=True).order_by("lastname", "firstname")
+    genres = Genre.objects.filter(visible=True).order_by("name")
+    site_pages = SitePage.objects.filter(visible=True).order_by("display_order")
+    return render_to_response("bookstore/sitemap.xml", locals())
     
 def site_page(request, page_link):
     page = get_object_or_404(SitePage, link__iexact=page_link, visible=True)
