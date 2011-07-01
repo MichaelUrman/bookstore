@@ -136,10 +136,23 @@ class BookMedia(models.Model):
         ('500x405', "500 by 405"),
         ('480x385', "480 by 385"),
     ))
-    youtube = models.SlugField("Youtube Video Key", max_length=50, blank=True)
+    youtube = models.CharField("Youtube Video Key", max_length=50, blank=True)
 
     def __unicode__(self):
         return "%s %s (%s)" % (self.book.title, self.video_size, self.youtube)
+        
+    def clean(self):
+        youtube = self.youtube
+        if youtube:
+            if '/v/' in youtube:
+                youtube = youtube[youtube.find('/v/') + 3:]
+            elif 'v=' in youtube:
+                youtube = youtube[youtube.find('v=') + 2:]
+            for c in '/?&;':
+                if c in youtube:
+                    youtube = youtube[:youtube.find(c)]
+            self.youtube = youtube
+        return models.Model.clean(self)
 
 class BookWallpaper(models.Model):
     book = models.ForeignKey(Book)
