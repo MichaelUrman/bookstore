@@ -98,9 +98,9 @@ def book_list(request):
     books = all_books[bookpager.slice]
     return render_to_response("bookstore/book_listing.html", locals())
 
-def book_detail(request, book_link):
+def book_detail(request, book_link, migrate_url=False):
     book = get_object_or_404(Book, link__iexact=book_link, visible=True)
-    if book.link != book_link:
+    if book.link != book_link or migrate_url:
         return redirect(book, permanent=True)
     return render_to_response("bookstore/book_detail.html", dict(book=book, link=request.build_absolute_uri()))
 

@@ -9,6 +9,7 @@ urlpatterns = patterns('bookstore.views',
     (r'^author/(?P<author_link>[\w-]+)$', 'author_detail'),
     (r'^book/$', 'book_list'),
     (r'^book/(?P<book_link>[\w-]+)$', 'book_detail'),
+    (r'^book/(?P<migrate_url>[^/]+)/(?P<book_link>[\w-]+)$', 'book_detail'), # migrate old urls
     (r'^genre/$', 'genre_list'),
     (r'^genre/(?P<genre_link>[\w-]+)$', 'genre_detail'),
     (r'^sitemap.xml$', 'sitemap'),
