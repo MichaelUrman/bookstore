@@ -9,6 +9,13 @@ from random import choice
 
 # HG mail: http://lillibridgepress.com:2096
 
+def get_migrated_object_or_404(model, migrate_values, **kwargs):
+    """equivalent to get_object_or_404 with fallback checks per migrate_values mapping dict"""
+    try:
+        return model.objects.get(**kwargs)
+    except model.DoesNotExist:
+        return get_object_or_404(model, **{k: migrate_values.get(v, v) for k, v in kwargs.items()})
+
 class Pager:
     def __init__(self, request, count, pagesize=12):
         try: page = int(request.REQUEST.get("p", 0))
@@ -83,7 +90,7 @@ def author_list(request):
     return render_to_response("bookstore/author_listing.html", locals())
 
 def author_detail(request, author_link):
-    author = get_object_or_404(Person, link__iexact=author_link, visible=True)
+    author = get_migrated_object_or_404(Person, migrate_authors, link__iexact=author_link, visible=True)
     if author.link != author_link:
         return redirect(author, permanent=True)
     all_books = author.book_set.filter(visible=True, publish_date__lte=datetime.now)
@@ -92,6 +99,11 @@ def author_detail(request, author_link):
     link = request.build_absolute_uri()
     return render_to_response("bookstore/author_detail.html", locals())
 
+migrate_authors = {
+    "DCPetterson": "DC_Petterson",
+    "George_O%26Gorman": "George_OGorman",
+}
+
 def book_list(request):
     all_books = Book.objects.filter(visible=True, publish_date__lte=datetime.now).order_by("title")
     bookpager = Pager(request, all_books.count())
@@ -99,10 +111,18 @@ def book_list(request):
     return render_to_response("bookstore/book_listing.html", locals())
 
 def book_detail(request, book_link, migrate_url=False):
-    book = get_object_or_404(Book, link__iexact=book_link, visible=True)
+    book = get_migrated_object_or_404(Book, migrate_books, link__iexact=book_link, visible=True)
     if book.link != book_link or migrate_url:
         return redirect(book, permanent=True)
     return render_to_response("bookstore/book_detail.html", dict(book=book, link=request.build_absolute_uri()))
+
+migrate_books = dict(
+    Body_Servant_of_Aleops="The_Body_Servant_of_Aleops",
+    magic_occult="magick_occult",
+    myth="Myths_Tales",
+    superhero="Superheroes",
+    violin_s_cry="A_Violin_s_Cry",
+)
 
 def genre_list(request):
     all_genres = Genre.objects.filter(visible=True).order_by("name")
@@ -111,7 +131,7 @@ def genre_list(request):
     return render_to_response("bookstore/genre_listing.html", locals())
 
 def genre_detail(request, genre_link):
-    genre = get_object_or_404(Genre, link__iexact=genre_link, visible=True)
+    genre = get_migrated_object_or_404(Genre, migrate_genres, link__iexact=genre_link, visible=True)
     if genre.link != genre_link:
         return redirect(genre, permanent=True)
     all_books = genre.book_set.filter(visible=True, publish_date__lte=datetime.now)
@@ -119,3 +139,7 @@ def genre_detail(request, genre_link):
     books = all_books[bookpager.slice]
     link = request.build_absolute_uri()
     return render_to_response("bookstore/genre_detail.html", locals())
+
+migrate_genres = dict(
+    magic_occult="magick_occult",
+)
