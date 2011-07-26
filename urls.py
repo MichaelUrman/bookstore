@@ -13,5 +13,6 @@ urlpatterns = patterns('bookstore.views',
     (r'^genre/$', 'genre_list'),
     (r'^genre/(?P<genre_link>[\w-]+)$', 'genre_detail'),
     (r'^sitemap.xml$', 'sitemap'),
+    (r'^(?P<migrate_url>page/)(?P<page_link>[\w-]+)$', 'site_page'),
     (r'^(?P<page_link>[\w-]+)$', 'site_page'),
 )

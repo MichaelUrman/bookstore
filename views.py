@@ -53,11 +53,15 @@ def sitemap(request):
     site_pages = SitePage.objects.filter(visible=True).order_by("display_order")
     return render_to_response("bookstore/sitemap.xml", locals())
     
-def site_page(request, page_link):
-    page = get_object_or_404(SitePage, link__iexact=page_link, visible=True)
-    if page.link != page_link:
+def site_page(request, page_link, migrate_url=False):
+    page = get_migrated_object_or_404(SitePage, migrate_pages, link__iexact=page_link, visible=True)
+    if page.link != page_link or migrate_url:
         return redirect(page, permanent=True)
     return render_to_response("bookstore/site_page.html", locals())
+
+migrate_pages = dict(
+    about="about-us",
+)
     
 def readme(request):
     from os import path
