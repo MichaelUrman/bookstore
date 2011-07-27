@@ -2,8 +2,11 @@
 from django.http import HttpResponse
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
 
-from bookstore.models import Genre, Person, Book, SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
+from bookstore.models import Genre, Person, Book, BookPublication
+from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from datetime import datetime
 from random import choice
 
@@ -118,7 +121,9 @@ def book_detail(request, book_link, migrate_url=False):
     book = get_migrated_object_or_404(Book, migrate_books, link__iexact=book_link, visible=True)
     if book.link != book_link or migrate_url:
         return redirect(book, permanent=True)
-    return render_to_response("bookstore/book_detail.html", dict(book=book, link=request.build_absolute_uri()))
+
+    link = request.build_absolute_uri()
+    return render_to_response("bookstore/book_detail.html", locals())
 
 migrate_books = dict(
     Body_Servant_of_Aleops="The_Body_Servant_of_Aleops",
@@ -147,3 +152,26 @@ def genre_detail(request, genre_link):
 migrate_genres = dict(
     magic_occult="magick_occult",
 )
+
+def signin(request, next='bookstore.views.storefront'):
+    next = request.GET.get("next", next)
+    login(request)
+    return render_to_response("bookstore/signout.html", locals())
+
+def signout(request, next='bookstore.views.storefront'):
+    next = request.GET.get("next", next)
+    logout(request)
+    return render_to_response("bookstore/signout.html", locals())
+
+@login_required
+def purchase_book(request, pub_id):
+    pub = get_object_or_404(BookPublication, pk=pub_id)
+    book = pub.book
+    PAYPAL = "https://www.sandbox.paypal.com/cgi-bin/webscr" # sandbox
+    # PAYPAL = "https://www.paypal.com/cgi-bin/webscr" # real
+    
+    return render_to_response("bookstore/purchase_book.html", locals())
+    
+@login_required
+def user_detail(request, user_id=None):
+    return ''

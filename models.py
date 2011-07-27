@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.core.files import File
 from datetime import datetime, date
+from django.contrib.auth.models import User
 
 # TODO:
 # consider dijit.Editor instead of minifmt: http://lazutkin.com/blog/2011/mar/13/using-dojo-rich-editor-djangos-admin/
@@ -218,6 +219,10 @@ class BookPublication(models.Model):
     format = models.ForeignKey(BookFormat)
     data = models.FileField(upload_to='bookstore/ebook/%Y')
 
+    @models.permalink
+    def get_purchase_url(self):
+        return ('bookstore.views.purchase_book', (), dict(pub_id=self.id))
+
     class Meta:
         unique_together = ("book", "format")
 
@@ -320,3 +325,36 @@ class StorefrontAd(models.Model):
 
     def __unicode__(self):
         return "%s [%s] (%s)" % (self.description, self.column, self.link)
+
+class Purchase(models.Model):
+    transaction = models.CharField(max_length=10, choices=(
+        ('P', 'Purchase'),
+        ('R', 'Replace'),
+        ('V', 'Review'),
+    ))
+    price = models.DecimalField(max_digits=10, decimal_places=3)
+    price_units = models.CharField(max_length=5, choices=(
+        ('USD', 'US Dollar'),
+        ('GBP', 'British Pound'),
+        ('EUR', 'Euro'),
+        ('CAD', 'Canada Dollar'),
+        ('AUD', 'Australian Dollar'),
+    ))
+    publication = models.ForeignKey(BookPublication)
+    status = models.CharField(max_length=10, choices=(
+        ('P', 'Pending'),
+        ('S', 'Submitted'),
+        ('R', 'Ready'),
+    ))
+    customer = models.ForeignKey(User, related_name="purchase_customer_set")
+    admin = models.ForeignKey(User, related_name="purchase_admin_set")
+    email = models.EmailField()
+    date = models.DateTimeField()
+    address = models.CharField(max_length=256)
+    downloads_remaining = models.IntegerField(default=3)
+
+    class Meta:
+        ordering = ["date"]
+        
+    def __unicode__(self):
+        return '%s %s of %s at %s' % (self.status, self.transaction, self.publication, self.date)

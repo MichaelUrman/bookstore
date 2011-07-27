@@ -21,11 +21,6 @@
 <body {% block bodyclass %}{% endblock %}>{% block body %}
 <div id="width">
 <div id="header" class="ui-corner-all">
-    {% block signin %}{% if not users.get_current_user %}
-        <div id="signin"><a href="{{loginurl}}" title="Sign in"><span class="ui-icon ui-icon-person"></span></a></div>
-    {% else %}
-        <div id="signin"><a href="{{logouturl}}" title="Sign out"><span class="ui-icon ui-icon-power"></span></a></div>
-    {% endif %}{% endblock signin %}
     {% block news %}<iframe id="newspos" src="{% url bookstore.views.site_news %}" frameborder="0" scrolling="no"></iframe>{% endblock news %}
 </div>
 {% block search %}
@@ -41,10 +36,30 @@
 <div id="navbar">{% block navitems %}{% site_headnav %}{% endblock navitems %}</div>
 
 <div id="ct">
-<div id="body">{% block content %}{% endblock %}</div>
+<div id="body">
+{% block content %}
+{% endblock %}
+</div>
 <div id="left">{% block leftbar %}<div id="sidebar" class="ui-corner-all bshadow">{% block sidebar %}{% genre_sidebar %}{% author_sidebar %}{% endblock sidebar %}</div{#sidebar#}>{% endblock leftbar %}</div{#left#}>
 <div id="right"><div id="rightbar" class="ui-corner-all">
 {% block rightbar %}
+{% block bookshelf %}
+<div class="rightbar ui-corner-all" id="user">
+    <h3 style="margin:0 0 0.5em 0" class="center">{% if request.user.is_authenticated %}{{ request.user.first_name }}'s{% else %}My{% endif %} Bookshelf</h3>
+    {% if request.user.is_authenticated %}
+    <div id="righttoolbar" class="ui-priority-secondary">
+    <a href="{% url bookstore.views.user_detail "" %}" title="Signed in as {{ request.user.get_full_name }} ({{ request.user.email }})"><button class="ui-icon ui-icon-person">Signed in as {{ request.user.get_full_name }} ({{ request.user.email }})</button></a>
+    <a href="{% url bookstore.views.signout %}?next={{ request.path }}" title="Sign out of Lillibridge Press"><button class="ui-icon ui-icon-power">Sign out</button></a>
+    {% if perms.bookstore.add_books %}
+    <a href="add_books" title="Add books"><button class="ui-icon ui-icon-power">Add books</button></a>
+    {% endif %}
+    {% if request.user.is_staff %}
+    <a href="{% url bookstore.views.readme %}" title="Readme"><button class="ui-icon ui-icon-info">Readme</button></a>
+    {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock bookshelf %}
 <iframe class="feature rightbar" src="{% url bookstore.views.site_picks %}" width="155" height="580" allowtransparency="true" frameborder="0" scrolling="no"></iframe>
 {% endblock rightbar %}
 </div{#rightbar#}></div{#right#}>
@@ -71,6 +86,7 @@ pageTracker._trackPageview();
 
 <script type="text/javascript"> $(function() { {% block onready %}
     $("#news").tabs().tabs("rotate", 7500).tabs("option", "fx", { opacity: "toggle" });
+    $("button").button();
 {% endblock onready %}}); </script>
 {% block script %}{% endblock script %}
 </div>

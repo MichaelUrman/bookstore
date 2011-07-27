@@ -1,0 +1,10 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}Come again soon! - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all">
+<p>You have signed out of Lillibridge Press.</p>
+<p>The last thing you were viewing was <a href="{{ next }}">here</a>.</p>
+</div>
+{% endblock content %}
