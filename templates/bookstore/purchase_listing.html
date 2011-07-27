@@ -1,0 +1,23 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}Purchases - {{ block.super }}{% endblock %}
+
+{% block content %}
+{% with book.get_absolute_url as booklink %}
+<div class="entry ui-corner-all" id="purchase">
+<h3>{{ request.user.first_name }}'s Purchases</h3>
+<ul>
+{% for purchase in purchases %}
+{% ifchanged purchase.date.date %}
+</ul>
+<h4>{{ purchase.date.date }}</h4>
+<ul>
+{% endifchanged %}
+<li><strong><a href="{{ purchase.get_absolute_url }}">View</a></strong>: 
+<span class="ui-corner-all {% if purchase.status == 'R' %}ui-state-highlight{% endif %}{% if purchase.status == 'C' %}ui-state-disabled{% endif %}{% if purchase.status == 'P' %}ui-priority-secondary{% endif %}">{{ purchase.get_status_display }} {{ purchase.get_transaction_display }} of <em><a href="{{ purchase.publication.book.get_absolute_url }}">{{ purchase.publication.book.title }}</a></em> in {{ purchase.publication.format.name }}</span>
+</li>
+{% endfor %}
+</ul>
+</div>
+{% endwith %}
+{% endblock content %}

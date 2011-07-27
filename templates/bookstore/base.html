@@ -50,6 +50,7 @@
     <div id="righttoolbar" class="ui-priority-secondary">
     <a href="{% url bookstore.views.user_detail "" %}" title="Signed in as {{ request.user.get_full_name }} ({{ request.user.email }})"><button class="ui-icon ui-icon-person">Signed in as {{ request.user.get_full_name }} ({{ request.user.email }})</button></a>
     <a href="{% url bookstore.views.signout %}?next={{ request.path }}" title="Sign out of Lillibridge Press"><button class="ui-icon ui-icon-power">Sign out</button></a>
+    <a href="{% url bookstore.views.purchase_listing %}" title="{{ request.user.first_name }}'s Purchases"><button class="ui-icon ui-icon-cart">{{ request.user.first_name }}'s Purchases</button></a>
     {% if perms.bookstore.add_books %}
     <a href="add_books" title="Add books"><button class="ui-icon ui-icon-power">Add books</button></a>
     {% endif %}

@@ -1,0 +1,17 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}Account - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all">
+<h3>{% if user %}{{ user.get_full_name }} ({{ user.email }})'s{% else %}My{% endif %} Account</h3>
+</div>
+{% if users %}
+<div class="entry ui-corner-all">
+<h3>Customers</h3>
+{% for account in users %}
+<a href="{% url bookstore.views.user_detail account.id %}">{{ account.get_full_name }}</a>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock content %}

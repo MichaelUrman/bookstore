@@ -1,6 +1,6 @@
 from django.contrib import admin
 from bookstore.models import Genre, Person, \
-    Book, BookReview, BookMedia, BookWallpaper, BookFormat, BookPublication, BookReseller, BookListing, \
+    Book, BookPrice, BookReview, BookMedia, BookWallpaper, BookFormat, BookPublication, BookReseller, BookListing, \
     SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 
 class GenreAdmin(admin.ModelAdmin):
@@ -23,6 +23,10 @@ class PersonAdmin(admin.ModelAdmin):
     list_editable = ("author", "editor")
     prepopulated_fields = {"link": ("firstname", "lastname")}
     
+class BookPriceInline(admin.TabularInline):
+    model = BookPrice
+    extra = 1
+
 class BookReviewInline(admin.TabularInline):
     model = BookReview
     extra = 1
@@ -39,12 +43,12 @@ class BookWallpaperInline(admin.TabularInline):
 class BookAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {"fields": ["title", "link", "isbn", "lbpn"]}),
-        ("Category", {"fields": ["authors", "genres", "size", "ero_rating", "price"]}),
+        ("Category", {"fields": ["authors", "genres", "size", "ero_rating"]}),
         ("Display", {"fields": ["blurb", "description", "page_image", "page_image_small", "visible", "upcoming", "feature", "bestseller"]}),
         ("Dates", {"fields": ["added_date", "publish_date"]}),
         ("SEO", {"fields": ["metakeywords", "metadescription"]}),
     ]
-    inlines = [BookReviewInline, BookMediaInline, BookWallpaperInline]
+    inlines = [BookPriceInline, BookReviewInline, BookMediaInline, BookWallpaperInline]
     list_display = ("title", "link", "visible", "upcoming", "feature", "bestseller", "publish_date")
     list_editable = ("visible", "upcoming", "feature", "bestseller", "publish_date")
     prepopulated_fields = {"link": ("title",)}

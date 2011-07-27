@@ -5,8 +5,9 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 
-from bookstore.models import Genre, Person, Book, BookPublication
+from bookstore.models import Genre, Person, Book, BookPublication, Purchase
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
+from django.contrib.auth.models import User
 from datetime import datetime
 from random import choice
 
@@ -166,12 +167,50 @@ def signout(request, next='bookstore.views.storefront'):
 @login_required
 def purchase_book(request, pub_id):
     pub = get_object_or_404(BookPublication, pk=pub_id)
+    LBP = request.build_absolute_uri().replace(request.get_full_path(), "")
+    if not LBP:
+        raise Http404
+
     book = pub.book
+    bookprice = book.price_set.get(currency='USD')
+    purchase = Purchase.objects.create(transaction='P',
+                        price=bookprice.price,
+                        currency=bookprice.currency,
+                        publication=pub,
+                        status='P',
+                        customer=request.user,
+                        email=request.user.email,
+                        address=request.META['REMOTE_ADDR'])
     PAYPAL = "https://www.sandbox.paypal.com/cgi-bin/webscr" # sandbox
     # PAYPAL = "https://www.paypal.com/cgi-bin/webscr" # real
-    
     return render_to_response("bookstore/purchase_book.html", locals())
+
+@login_required
+def purchase_listing(request):
+    purchases = Purchase.objects.filter(customer=request.user).order_by("-date")
+    return render_to_response("bookstore/purchase_listing.html", locals())
+
+@login_required
+def purchase_detail(request, purchase_id):
+    purchase = get_object_or_404(Purchase, pk=purchase_id)
+    action = request.REQUEST.get('action')
+    if action == "cancelled":
+        purchase.status = 'C'
+        purchase.save()
+    elif action == "purchased":
+        purchase.status = 'S'
+        purchase.save()
+    elif not action:
+        pub = purchase.publication
+        book = pub.book
+        return render_to_response("bookstore/purchase_detail.html", locals())
+    return redirect(purchase, permanent=True)
     
 @login_required
 def user_detail(request, user_id=None):
-    return ''
+    if request.user.is_staff:
+        users = User.objects.all()
+        if user_id:
+            user = User.objects.get(pk=user_id)
+            purchases = Purchase.objects.filter(customer=user).order_by("-date")
+    return render_to_response("bookstore/user_detail.html", locals())

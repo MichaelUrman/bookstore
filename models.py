@@ -7,6 +7,14 @@ from django.contrib.auth.models import User
 # TODO:
 # consider dijit.Editor instead of minifmt: http://lazutkin.com/blog/2011/mar/13/using-dojo-rich-editor-djangos-admin/
 
+CURRENCY = (
+    ('USD', 'US Dollar'),
+    ('GBP', 'British Pound'),
+    ('EUR', 'Euro'),
+    ('CAD', 'Canada Dollar'),
+    ('AUD', 'Australian Dollar'),
+)
+
 # Base models
 class Genre(models.Model):
     link = models.SlugField("Genre Link", max_length=200, unique=True, help_text="Address: /genre/[LINK]")
@@ -89,7 +97,6 @@ class Book(models.Model):
     visible = models.BooleanField("Visible", help_text="Show this book in the store")
     metakeywords = models.TextField("Page Keywords", blank=True, help_text="Useful only for Visible Authors")
     metadescription = models.TextField("Page Description", blank=True, help_text="Useful only for Visible Authors")
-    price = models.CharField("price", max_length=20, help_text="Price to display on the book's page")
     upcoming = models.BooleanField(default=True, help_text="Include in upcoming lists if Publish Date is in the future")
     feature = models.BooleanField(default=False, help_text="Include this book as a potential featured item")
     bestseller = models.BooleanField(default=False, help_text="Include this book as a potential bestseller")
@@ -117,6 +124,14 @@ class Book(models.Model):
 
     def listings_by_reseller(self):
         return self.booklisting_set.filter(reseller__visible=True).order_by('reseller__display_order').all()
+
+class BookPrice(models.Model):
+    book = models.ForeignKey(Book, related_name="price_set")
+    price = models.DecimalField(max_digits=10, decimal_places=3, help_text="Price to display on the book's page")
+    currency = models.CharField(max_length=5, default='USD', choices=CURRENCY, help_text="Currency for book's price")
+
+    class Meta:
+        unique_together = ("book", "currency")
 
 class BookReview(models.Model):
     book = models.ForeignKey(Book)
@@ -327,29 +342,24 @@ class StorefrontAd(models.Model):
         return "%s [%s] (%s)" % (self.description, self.column, self.link)
 
 class Purchase(models.Model):
-    transaction = models.CharField(max_length=10, choices=(
+    transaction = models.CharField(max_length=10, default='P', choices=(
         ('P', 'Purchase'),
         ('R', 'Replace'),
         ('V', 'Review'),
     ))
     price = models.DecimalField(max_digits=10, decimal_places=3)
-    price_units = models.CharField(max_length=5, choices=(
-        ('USD', 'US Dollar'),
-        ('GBP', 'British Pound'),
-        ('EUR', 'Euro'),
-        ('CAD', 'Canada Dollar'),
-        ('AUD', 'Australian Dollar'),
-    ))
+    currency = models.CharField(max_length=5, default='USD', choices=CURRENCY)
     publication = models.ForeignKey(BookPublication)
-    status = models.CharField(max_length=10, choices=(
+    status = models.CharField(max_length=10, default='P', choices=(
         ('P', 'Pending'),
         ('S', 'Submitted'),
         ('R', 'Ready'),
+        ('C', 'Cancelled'),
     ))
+    admin = models.ForeignKey(User, null=True, related_name="purchase_admin_set")
     customer = models.ForeignKey(User, related_name="purchase_customer_set")
-    admin = models.ForeignKey(User, related_name="purchase_admin_set")
     email = models.EmailField()
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
     address = models.CharField(max_length=256)
     downloads_remaining = models.IntegerField(default=3)
 
@@ -357,4 +367,8 @@ class Purchase(models.Model):
         ordering = ["date"]
         
     def __unicode__(self):
-        return '%s %s of %s at %s' % (self.status, self.transaction, self.publication, self.date)
+        return '%s %s of %s at %s' % (self.get_status_display(), self.get_transaction_display(), self.publication, self.date)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('bookstore.views.purchase_detail', (), dict(purchase_id=self.id))
