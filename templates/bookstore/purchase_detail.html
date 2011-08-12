@@ -9,6 +9,20 @@
 <h3>Purchase of <em>{{ book.title }}</em></h3>
 <p>Your {{ purchase.get_transaction_display }} of <strong><a href="{{ booklink }}">{{ book.title }}</a></strong> in {{ pub.format.name }} on {{ purchase.date }} for ${{ purchase.price }} is <strong>{{ purchase.get_status_display }}</strong>.</p>
 
+{% if request.user.is_staff %}
+<form method="POST" class="admin">
+{% csrf_token %}
+<label for="setstatus">Override status:</label>
+<select name="setstatus" id="setstatus">
+<option value="">No change</option>
+<option value="P">Pending</option>
+<option value="S">Submitted</option>
+<option value="R">Ready - Give it away</option>
+<option value="C">Cancelled</option>
+</select>
+<button>Go</button>
+</form>
+{% endif %}
 </div>
 {% endwith %}
 {% endblock content %}

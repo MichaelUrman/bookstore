@@ -1,13 +1,32 @@
 {% extends "bookstore/base.html" %}
+{% load bookstore_extras %}
 
 {% block title %}Account - {{ block.super }}{% endblock %}
 
 {% block content %}
 <div class="entry ui-corner-all">
-<h3>{% if user %}{{ user.get_full_name }} ({{ user.email }})'s{% else %}My{% endif %} Account</h3>
+<h3>{{ user.first_name }}'s Account</h3>
+<dl>
+<dt>Name:</dt>
+<dd>{{ user.get_full_name }}</dd>
+<dt>Email:</dt>
+<dd>{{ user.email }}</dd>
+<dt>Joined:</dt>
+<dd>{{ user.date_joined.date }}</dd>
+</dl>
 </div>
+
+{% if bookshelf %}
+<div class="entry grid ui-corner-all">
+<h3>{{ user.first_name }}'s Bookshelf</h3>
+{% for publication in bookshelf %}
+{% bookcard publication.book %}
+{% endfor %}
+</div>
+{% endif %}
+
 {% if users %}
-<div class="entry ui-corner-all">
+<div class="entry ui-corner-all admin">
 <h3>Customers</h3>
 {% for account in users %}
 <a href="{% url bookstore.views.user_detail account.id %}">{{ account.get_full_name }}</a>

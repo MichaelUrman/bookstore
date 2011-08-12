@@ -4,6 +4,7 @@ from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
+from django.template import RequestContext
 
 from bookstore.models import Genre, Person, Book, BookPublication, Purchase
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
@@ -193,6 +194,12 @@ def purchase_listing(request):
 @login_required
 def purchase_detail(request, purchase_id):
     purchase = get_object_or_404(Purchase, pk=purchase_id)
+    setstatus = request.POST.get('setstatus')
+    if request.user.is_staff and setstatus:
+        purchase.status = setstatus
+        purchase.save()
+        return redirect(purchase, permanent=True)
+
     action = request.REQUEST.get('action')
     if action == "cancelled":
         purchase.status = 'C'
@@ -203,14 +210,16 @@ def purchase_detail(request, purchase_id):
     elif not action:
         pub = purchase.publication
         book = pub.book
-        return render_to_response("bookstore/purchase_detail.html", locals())
+        return render_to_response("bookstore/purchase_detail.html", locals(), context_instance=RequestContext(request))
     return redirect(purchase, permanent=True)
     
 @login_required
 def user_detail(request, user_id=None):
+    user = request.user
     if request.user.is_staff:
         users = User.objects.all()
         if user_id:
             user = User.objects.get(pk=user_id)
             purchases = Purchase.objects.filter(customer=user).order_by("-date")
+    bookshelf = BookPublication.objects.filter(purchase__customer=user, purchase__status='R').order_by("-purchase__date")
     return render_to_response("bookstore/user_detail.html", locals())
