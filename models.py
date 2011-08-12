@@ -15,6 +15,8 @@ CURRENCY = (
     ('AUD', 'Australian Dollar'),
 )
 
+CURRENCY_SYMBOLS = dict(USD='$', GBP=u'\u00a3', EUR=u'\u20ac', CAD='(CA) $', AUD='(AU) $')
+
 # Base models
 class Genre(models.Model):
     link = models.SlugField("Genre Link", max_length=200, unique=True, help_text="Address: /genre/[LINK]")
@@ -110,10 +112,16 @@ class Book(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('bookstore.views.book_detail', (), dict(book_link=self.link))
-        
+
     @property
     def is_published(self):
         return self.publish_date <= date.today()
+
+    @property
+    def price(self):
+        for price in self.price_set.filter(currency='USD'):
+            return "%s%s" % (price.symbol, price.price)
+        return 'ERROR'
 
     @property
     def is_free(self):
@@ -129,9 +137,15 @@ class BookPrice(models.Model):
     book = models.ForeignKey(Book, related_name="price_set")
     price = models.DecimalField(max_digits=10, decimal_places=3, help_text="Price to display on the book's page")
     currency = models.CharField(max_length=5, default='USD', choices=CURRENCY, help_text="Currency for book's price")
+    @property
+    def symbol(self, symbols=CURRENCY_SYMBOLS):
+        return symbols[self.currency]
 
     class Meta:
         unique_together = ("book", "currency")
+        
+    def __unicode__(self):
+        return "%s%s" % (self.symbol, self.price)
 
 class BookReview(models.Model):
     book = models.ForeignKey(Book)
