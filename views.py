@@ -207,28 +207,36 @@ def purchase_listing(request):
 @login_required
 def purchase_detail(request, purchase_id):
     purchase = get_object_or_404(Purchase, pk=purchase_id)
+    format = purchase.publication.format
+    book = purchase.publication.book
+
     setstatus = request.POST.get('setstatus')
     if request.user.is_staff and setstatus:
         purchase.status = setstatus
+        purchase.admin = request.user
         purchase.save()
-        pub = purchase.publication
         messages.add_message(request, messages.SUCCESS, 
             "Set purchase %(pid)s (%(title)s in %(format)s for %(customer)s) to %(status)s" % dict(
-                pid=purchase_id, title=pub.book.title, format=pub.format.name,
+                pid=purchase_id, title=book.title, format=format.name,
                 customer=purchase.customer.email, status=purchase.get_status_display()))
         return redirect(purchase, permanent=True)
 
     action = request.REQUEST.get('action')
-    if action == "cancelled":
-        purchase.status = 'C'
-        purchase.save()
-    elif action == "purchased":
-        purchase.status = 'S'
-        purchase.save()
-    elif not action:
-        pub = purchase.publication
-        book = pub.book
+    if not action:
         return render_to_response("bookstore/purchase_detail.html", locals(), context_instance=RequestContext(request))
+
+    if purchase.status in 'PCS':
+        if action == "cancelled":
+            purchase.status = 'C'
+            purchase.save()
+            messages.add_message(request, messages.ERROR, "You have cancelled your purchase of %s in %s." % (purchase.publication.book.title, purchase.publication.format.name))
+        elif action == "purchased":
+            purchase.status = 'S'
+            purchase.save()
+            messages.add_message(request, messages.SUCCESS,
+                "Thank you for purchasing %s in %s. We'll email you when your payment goes through." % (purchase.publication.book.title, purchase.publication.format.name))
+        else:
+            messages.add_message(request, messages.DEBUG, "Someone made an unexpected action request: %s" % action)
     return redirect(purchase, permanent=True)
     
 @login_required

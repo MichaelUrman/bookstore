@@ -7,7 +7,7 @@
 <div class="entry ui-corner-all" id="purchase">
 <a href="{{ booklink }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" /></a><br/>
 <h3>Purchase of <em>{{ book.title }}</em></h3>
-<p>Your {{ purchase.get_transaction_display }} of <strong><a href="{{ booklink }}">{{ book.title }}</a></strong> in {{ pub.format.name }} on {{ purchase.date }} for ${{ purchase.price }} is <strong>{{ purchase.get_status_display }}</strong>.</p>
+<p>Your {{ purchase.get_transaction_display }} of <strong><a href="{{ booklink }}">{{ book.title }}</a></strong> in {{ format.name }} on {{ purchase.date }} for ${{ purchase.price }} is <strong>{{ purchase.get_status_display }}</strong>.</p>
 
 {% if request.user.is_staff %}
 <form method="POST" class="admin">
