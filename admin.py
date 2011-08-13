@@ -1,7 +1,7 @@
 from django.contrib import admin
-from bookstore.models import Genre, Person, \
+from bookstore.models import Genre, Person, MergedUser, \
     Book, BookPrice, BookReview, BookMedia, BookWallpaper, BookFormat, BookPublication, BookReseller, BookListing, \
-    SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
+    SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd, Purchase
 
 class GenreAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -22,7 +22,10 @@ class PersonAdmin(admin.ModelAdmin):
     list_display = ("firstname", "lastname", "author", "editor")
     list_editable = ("author", "editor")
     prepopulated_fields = {"link": ("firstname", "lastname")}
-    
+
+class MergedUserAdmin(admin.ModelAdmin):
+    fieldsets = [ (None, {"fields": ["name", "accounts"]}) ]
+
 class BookPriceInline(admin.TabularInline):
     model = BookPrice
     extra = 1
@@ -115,6 +118,7 @@ class StorefrontAdAdmin(admin.ModelAdmin):
     
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Person, PersonAdmin)
+admin.site.register(MergedUser, MergedUserAdmin)
 admin.site.register(Book, BookAdmin)
 admin.site.register(BookFormat, BookFormatAdmin)
 admin.site.register(BookPublication, BookPublicationAdmin)

@@ -37,6 +37,11 @@
 
 <div id="ct">
 <div id="body">
+{% for message in messages %}
+{% if forloop.first %}<div class="entry ui-corner-all messages">{% endif %}
+<h4 class="{{ message.tags }} ui-corner-all">{{ message }}</h4>
+{% if forloop.last %}</div>{% endif %}
+{% endfor %}
 {% block content %}
 {% endblock %}
 </div>

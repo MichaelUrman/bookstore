@@ -4,6 +4,11 @@ from django.core.files import File
 from datetime import datetime, date
 from django.contrib.auth.models import User
 
+# HACK: make it possible to identify openiduser records in the admin interface.
+def user_unicode(self):
+    return "%s (%s)" % (self.username, self.email)
+User.__unicode__ = user_unicode
+
 # TODO:
 # consider dijit.Editor instead of minifmt: http://lazutkin.com/blog/2011/mar/13/using-dojo-rich-editor-djangos-admin/
 
@@ -41,6 +46,10 @@ class Genre(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('bookstore.views.genre_detail', (), dict(genre_link=self.link))
+
+class MergedUser(models.Model):
+    name = models.CharField(max_length=200)
+    accounts = models.ManyToManyField(User, related_name='+')
 
 class Person(models.Model):
     link = models.SlugField("Author Link", max_length=200, unique=True, help_text="Address: /author/[LINK]")

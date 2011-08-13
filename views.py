@@ -4,9 +4,10 @@ from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
+from django.contrib import messages
 from django.template import RequestContext
 
-from bookstore.models import Genre, Person, Book, BookPublication, Purchase
+from bookstore.models import Genre, Person, Book, BookPublication, Purchase, MergedUser
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -20,6 +21,11 @@ def get_migrated_object_or_404(model, migrate_values, **kwargs):
         return model.objects.get(**kwargs)
     except model.DoesNotExist:
         return get_object_or_404(model, **{k: migrate_values.get(v, v) for k, v in kwargs.items()})
+
+def get_merged_purchases(user, **kwargs):
+    for merged in MergedUser.objects.filter(accounts=user):
+        return Purchase.objects.filter(customer__in=merged.accounts.all(), **kwargs)
+    return Purchase.objects.filter(customer=user, **kwargs)
 
 class Pager:
     def __init__(self, request, count, pagesize=12):
@@ -168,13 +174,12 @@ def signout(request, next='bookstore.views.storefront'):
 @login_required
 def purchase_book(request, pub_id):
     pub = get_object_or_404(BookPublication, pk=pub_id)
-
-    matching = Purchase.objects.filter(customer=request.user, publication=pub)
-    try: purchased = matching.filter(status='R').latest('date')
+    purchases = get_merged_purchases(request.user, publication=pub)
+    try: purchased = purchases.filter(status='R').latest('date')
     except Purchase.DoesNotExist: pass
-    try: submitted = matching.filter(status='S').latest('date')
+    try: submitted = purchases.filter(status='S').latest('date')
     except Purchase.DoesNotExist: pass
-    del matching
+    del purchases
     
     LBP = request.build_absolute_uri().replace(request.get_full_path(), "")
     if not LBP:
@@ -196,7 +201,7 @@ def purchase_book(request, pub_id):
 
 @login_required
 def purchase_listing(request):
-    purchases = Purchase.objects.filter(customer=request.user).order_by("-date")
+    purchases = get_merged_purchases(request.user).order_by("-date")
     return render_to_response("bookstore/purchase_listing.html", locals())
 
 @login_required
@@ -206,6 +211,11 @@ def purchase_detail(request, purchase_id):
     if request.user.is_staff and setstatus:
         purchase.status = setstatus
         purchase.save()
+        pub = purchase.publication
+        messages.add_message(request, messages.SUCCESS, 
+            "Set purchase %(pid)s (%(title)s in %(format)s for %(customer)s) to %(status)s" % dict(
+                pid=purchase_id, title=pub.book.title, format=pub.format.name,
+                customer=purchase.customer.email, status=purchase.get_status_display()))
         return redirect(purchase, permanent=True)
 
     action = request.REQUEST.get('action')
@@ -228,6 +238,6 @@ def user_detail(request, user_id=None):
         users = User.objects.all()
         if user_id:
             user = User.objects.get(pk=user_id)
-            purchases = Purchase.objects.filter(customer=user).order_by("-date")
+            purchases = get_merged_purchases(request.user).order_by("-date")
     bookshelf = BookPublication.objects.filter(purchase__customer=user, purchase__status='R').order_by("-purchase__date")
     return render_to_response("bookstore/user_detail.html", locals())
