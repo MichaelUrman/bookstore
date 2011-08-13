@@ -168,6 +168,14 @@ def signout(request, next='bookstore.views.storefront'):
 @login_required
 def purchase_book(request, pub_id):
     pub = get_object_or_404(BookPublication, pk=pub_id)
+
+    matching = Purchase.objects.filter(customer=request.user, publication=pub)
+    try: purchased = matching.filter(status='R').latest('date')
+    except Purchase.DoesNotExist: pass
+    try: submitted = matching.filter(status='S').latest('date')
+    except Purchase.DoesNotExist: pass
+    del matching
+    
     LBP = request.build_absolute_uri().replace(request.get_full_path(), "")
     if not LBP:
         raise Http404

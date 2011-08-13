@@ -5,6 +5,28 @@
 {% block title %}{{ book.title }} - {{ block.super }}{% endblock %}
 
 {% block content %}
+
+{% if purchased %}
+<div class="entry ui-corner-all">
+<h3>You have already purchased <em>{{ book.title }}</em></h3>
+<p>Click the button below to download <em>{{ book.title }}</em> ({{ pub.format.name }}). If you wish to purchase it again, see the next section.</p>
+<form class="center" method="POST" action="{{ purchased.get_download_url }}">
+{% csrf_token %}
+<button>
+<img src="{{ pub.format.image.url }}" title="{{ pub.format.name }}" style="float:left;"/>&nbsp;<strong>{{ book.title }}</strong><br/><br/>Download&nbsp;Now
+</button>
+</form>
+</div>
+{% else %}
+    {% if submitted %}
+    <div class="entry ui-corner-all">
+    <h3>You have already purchased <em>{{ book.title }}</em></h3>
+    <p>You have already initiated a payment through PayPal to purchase <em>{{ book.title }}</em> ({{ pub.format.name }}). However that payment is still pending. <a href="{{ submitted.get_absolute_url }}">View details</a>.</p>
+    <p>Note that submitting another purchase below will most likely result in another charge to your account.</p>
+    </div>
+    {% endif %}
+{% endif %}
+
 <div class="entry ui-corner-all" id="purchase">
 <h3>Purchasing <em>{{ book.title }}</em></h3>
 <p>Click the button below to complete this transaction on PayPal. Once your payment has been processed, you will receive an email with instructions for downloading <em>{{ book.title }}</em> ({{ pub.format.name }}). This email will be sent to the address registered to your PayPal account.</p>
@@ -25,7 +47,7 @@
 <input type="hidden" name="notify_url" value="{{LBP}}/paypal/ipn" />
 
 <button name="submit" style="padding: 0.5em 1em;">
-<img src="{{ pub.format.image.url }}" title="{{ pub.format.name }}" />&nbsp;<strong>{{ book.title }}</strong><br />{{ book.price }}<br /><br />
+<img src="{{ pub.format.image.url }}" title="{{ pub.format.name }}" style="float:left;"/>&nbsp;<strong>{{ book.title }}</strong><br />{{ book.price }}<br /><br />
 <img src="http://www.paypal.com/en_US/i/btn/x-click-but01.gif" alt="Make payments with PayPal - it's fast, free, and secure!" />
 </button>
 
