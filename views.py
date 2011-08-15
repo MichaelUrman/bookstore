@@ -101,7 +101,9 @@ def choose(qs, choice=choice):
 
 def site_picks(request):
     bestseller = choose(Book.objects.filter(visible=True, bestseller=True))
-    feature = bestseller and choose(Book.objects.filter(visible=True, feature=True).exclude(link__exact=bestseller.link))
+    feature = Book.objects.filter(visible=True, feature=True)
+    if bestseller: feature = feature.exclude(link__exact=bestseller.link)
+    feature = choose(feature)
     return render_to_response("bookstore/site_picks.html", locals())
 
 def author_list(request):
