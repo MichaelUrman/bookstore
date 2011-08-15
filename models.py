@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.signals import post_save
 from django.core.files import File
 from datetime import datetime, date
 from django.contrib.auth.models import User
@@ -147,11 +146,6 @@ class Book(models.Model):
     def listings_by_reseller(self):
         return self.booklisting_set.filter(reseller__visible=True).order_by('reseller__display_order').all()
 
-def update_book_modified(sender, **kwargs):
-    instance = kwargs.get('instance')
-    if instance:
-        instance.book.save()
-
 class BookPrice(models.Model):
     book = models.ForeignKey(Book, related_name="price_set")
     price = models.DecimalField(max_digits=10, decimal_places=3, help_text="Price to display on the book's page")
@@ -166,8 +160,6 @@ class BookPrice(models.Model):
     def __unicode__(self):
         return "%s%s" % (self.symbol, self.price)
 
-post_save.connect(update_book_modified, sender=BookPrice)
-
 class BookReview(models.Model):
     book = models.ForeignKey(Book)
     quote = models.TextField()
@@ -179,8 +171,6 @@ class BookReview(models.Model):
 
     def __unicode__(self):
         return "%s by %s on %s" % (self.book.title, self.reviewer, self.date)
-
-post_save.connect(update_book_modified, sender=BookReview)
 
 class BookMedia(models.Model):
     book = models.ForeignKey(Book)
@@ -207,8 +197,6 @@ class BookMedia(models.Model):
             self.youtube = youtube
         return models.Model.clean(self)
 
-post_save.connect(update_book_modified, sender=BookMedia)
-
 class BookWallpaper(models.Model):
     book = models.ForeignKey(Book)
     wallpaper = models.ImageField(upload_to='bookstore/img/wall', width_field="wallwidth", height_field="wallheight", help_text="Try to include the largest of any of these size groups. There's no need to include more than one.\n16x10: 1920x1200, 1440x900, 1280x800\n4x3: 1600x1200, 1024x768\n16x9: 1920x1080\n5x4: 1280x1024")
@@ -220,38 +208,6 @@ class BookWallpaper(models.Model):
     
     def __unicode__(self):
         return "%s at %dx%d" % (self.book.title, self.wallwidth, self.wallheight)
-
-post_save.connect(update_book_modified, sender=BookWallpaper)
-
-def wallpaper_thumbnail(sender, **kwargs):
-    w = kwargs["instance"]
-    from os import path
-    try:
-        wallpath = w.wallpaper.path
-        thumbpath = w.thumbnail.path
-    except ValueError:
-        thumbpath = path.splitext(wallpath)[0] + ".thumb.jpg"
-    try:
-        if path.getmtime(wallpath) <= path.getmtime(thumbpath):
-            return
-    except EnvironmentError:
-        pass
-    
-    from PIL import Image
-    image = Image.open(w.wallpaper.path)
-    if image.mode not in ('L', 'RGB'):
-        image = image.convert('RGB')
-    image.thumbnail((220, 220), Image.ANTIALIAS)
-
-    from StringIO import StringIO
-    data = StringIO()
-    image.save(data, "JPEG")
-    data.size = data.tell()
-    data.seek(0, 0)
-    #data.name = path.basename(thumbpath)
-    w.thumbnail.save(path.basename(thumbpath), File(data))
-    
-post_save.connect(wallpaper_thumbnail, sender=BookWallpaper)
 
 class BookFormat(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -270,8 +226,6 @@ class BookFormat(models.Model):
     def __unicode__(self):
         return "%s (*.%s), %s" % (self.name, self.extension, self.mime)
 
-post_save.connect(update_book_modified, sender=BookFormat)
-
 class BookPublication(models.Model):
     book = models.ForeignKey(Book)
     format = models.ForeignKey(BookFormat)
@@ -287,8 +241,6 @@ class BookPublication(models.Model):
     def __unicode__(self):
         return "%s in %s" % (self.book.title, self.format.name)
 
-post_save.connect(update_book_modified, sender=BookPublication)
-
 class BookReseller(models.Model):
     name = models.CharField(max_length=200, unique=True)
     display_order = models.IntegerField()
@@ -303,8 +255,6 @@ class BookReseller(models.Model):
     def __unicode__(self):
         return self.name
 
-post_save.connect(update_book_modified, sender=BookReseller)
-
 class BookListing(models.Model):
     book = models.ForeignKey(Book)
     reseller = models.ForeignKey(BookReseller)
@@ -315,8 +265,6 @@ class BookListing(models.Model):
 
     def __unicode__(self):
         return "%s at %s" % (self.book.title, self.reseller.name)
-
-post_save.connect(update_book_modified, sender=BookListing)
 
 class SiteNewsBanner(models.Model):
     display_order = models.IntegerField("Order", default=100, help_text="Show Banners in this order")
@@ -436,6 +384,29 @@ class PurchaseEmail(models.Model):
     def __unicode__(self):
         return '%s purchase email to %s (%s)' % (self.sent and 'Sent' or 'Unsent', self.name, self.email)
 
+class PaypalIpn(models.Model):
+    purchase = models.ForeignKey(Purchase)
+    params = models.TextField("PayPal IPN Parameters", help_text="guru only")
+    payment = models.DecimalField(max_digits=10, decimal_places=3)
+    currency = models.CharField(max_length=5, default='USD', choices=CURRENCY)
+    payment_status = models.CharField(max_length=50)
+    entered = models.DateTimeField(auto_now_add=True)
+    
+    def parse_params(self):
+        return cgi.parse_qsl(self.params)
+
+#
+# Signal handling
+#
+from django.db.models.signals import post_save
+#from django.dispatch import receiver
+def receiver(signal, **kwargs):
+    def connector(handler):
+        signal.connect(handler, **kwargs)
+        return handler
+    return connector
+        
+@receiver(post_save, sender=PurchaseEmail, dispatch_uid="send_purchase_email@PurchaseEmail")
 def send_purchase_email(sender, **kwargs):
     req = kwargs.get('instance')
     created = kwargs.get('created')
@@ -467,15 +438,42 @@ def send_purchase_email(sender, **kwargs):
         #msg.headers["Precendence"] = "bulk"
         #msg.headers["List-Unsubscribe"] = ...
 
-post_save.connect(send_purchase_email, sender=PurchaseEmail, dispatch_uid="send_email@PurchaseEmail")
+@receiver(post_save, sender=BookPrice, dispatch_uid="update_book_modified@BookPrice")
+@receiver(post_save, sender=BookReview, dispatch_uid="update_book_modified@BookReview")
+@receiver(post_save, sender=BookWallpaper, dispatch_uid="update_book_modified@BookWallpaper")
+@receiver(post_save, sender=BookPublication, dispatch_uid="update_book_modified@BookPublication")
+@receiver(post_save, sender=BookListing, dispatch_uid="update_book_modified@BookListing")
+@receiver(post_save, sender=BookMedia, dispatch_uid="update_book_modified@BookMedia")
+def update_book_modified(sender, **kwargs):
+    instance = kwargs.get('instance')
+    if instance:
+        instance.book.save()
 
-class PaypalIpn(models.Model):
-    purchase = models.ForeignKey(Purchase)
-    params = models.TextField("PayPal IPN Parameters", help_text="guru only")
-    payment = models.DecimalField(max_digits=10, decimal_places=3)
-    currency = models.CharField(max_length=5, default='USD', choices=CURRENCY)
-    payment_status = models.CharField(max_length=50)
-    entered = models.DateTimeField(auto_now_add=True)
+@receiver(post_save, sender=BookWallpaper, dispatch_uid="wallpaper_thumbnail@BookWallpaper")
+def wallpaper_thumbnail(sender, **kwargs):
+    w = kwargs["instance"]
+    from os import path
+    try:
+        wallpath = w.wallpaper.path
+        thumbpath = w.thumbnail.path
+    except ValueError:
+        thumbpath = path.splitext(wallpath)[0] + ".thumb.jpg"
+    try:
+        if path.getmtime(wallpath) <= path.getmtime(thumbpath):
+            return
+    except EnvironmentError:
+        pass
     
-    def parse_params(self):
-        return cgi.parse_qsl(self.params)
+    from PIL import Image
+    image = Image.open(w.wallpaper.path)
+    if image.mode not in ('L', 'RGB'):
+        image = image.convert('RGB')
+    image.thumbnail((220, 220), Image.ANTIALIAS)
+
+    from StringIO import StringIO
+    data = StringIO()
+    image.save(data, "JPEG")
+    data.size = data.tell()
+    data.seek(0, 0)
+    #data.name = path.basename(thumbpath)
+    w.thumbnail.save(path.basename(thumbpath), File(data))
