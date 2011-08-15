@@ -39,7 +39,7 @@ class Genre(models.Model):
     page_image = models.ImageField(upload_to='bookstore/img/genre')
     metakeywords = models.TextField("Page Keywords", blank=True)
     metadescription = models.TextField("Page Description", blank=True)
-    modified = models.DateField(auto_now=True)
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["display_order"]
@@ -67,7 +67,7 @@ class Person(models.Model):
     author = models.BooleanField("Is Author", help_text="Make this person available to be a Book Author")
     editor = models.BooleanField("Is Editor", help_text="Make this person available to be an Editor")
     visible = models.BooleanField("Visible", help_text="Show this author in the store")
-    modified = models.DateField(auto_now=True)
+    modified = models.DateTimeField(auto_now=True)
     rank = models.FloatField(default=0.0)
     
     class Meta:
@@ -115,6 +115,7 @@ class Book(models.Model):
     upcoming = models.BooleanField(default=True, help_text="Include in upcoming lists if Publish Date is in the future")
     feature = models.BooleanField(default=False, help_text="Include this book as a potential featured item")
     bestseller = models.BooleanField(default=False, help_text="Include this book as a potential bestseller")
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-added_date"]
@@ -146,6 +147,11 @@ class Book(models.Model):
     def listings_by_reseller(self):
         return self.booklisting_set.filter(reseller__visible=True).order_by('reseller__display_order').all()
 
+def update_book_modified(sender, **kwargs):
+    instance = kwargs.get('instance')
+    if instance:
+        instance.book.save()
+
 class BookPrice(models.Model):
     book = models.ForeignKey(Book, related_name="price_set")
     price = models.DecimalField(max_digits=10, decimal_places=3, help_text="Price to display on the book's page")
@@ -160,6 +166,8 @@ class BookPrice(models.Model):
     def __unicode__(self):
         return "%s%s" % (self.symbol, self.price)
 
+post_save.connect(update_book_modified, sender=BookPrice)
+
 class BookReview(models.Model):
     book = models.ForeignKey(Book)
     quote = models.TextField()
@@ -171,6 +179,8 @@ class BookReview(models.Model):
 
     def __unicode__(self):
         return "%s by %s on %s" % (self.book.title, self.reviewer, self.date)
+
+post_save.connect(update_book_modified, sender=BookReview)
 
 class BookMedia(models.Model):
     book = models.ForeignKey(Book)
@@ -197,6 +207,8 @@ class BookMedia(models.Model):
             self.youtube = youtube
         return models.Model.clean(self)
 
+post_save.connect(update_book_modified, sender=BookMedia)
+
 class BookWallpaper(models.Model):
     book = models.ForeignKey(Book)
     wallpaper = models.ImageField(upload_to='bookstore/img/wall', width_field="wallwidth", height_field="wallheight", help_text="Try to include the largest of any of these size groups. There's no need to include more than one.\n16x10: 1920x1200, 1440x900, 1280x800\n4x3: 1600x1200, 1024x768\n16x9: 1920x1080\n5x4: 1280x1024")
@@ -208,6 +220,8 @@ class BookWallpaper(models.Model):
     
     def __unicode__(self):
         return "%s at %dx%d" % (self.book.title, self.wallwidth, self.wallheight)
+
+post_save.connect(update_book_modified, sender=BookWallpaper)
 
 def wallpaper_thumbnail(sender, **kwargs):
     w = kwargs["instance"]
@@ -256,6 +270,8 @@ class BookFormat(models.Model):
     def __unicode__(self):
         return "%s (*.%s), %s" % (self.name, self.extension, self.mime)
 
+post_save.connect(update_book_modified, sender=BookFormat)
+
 class BookPublication(models.Model):
     book = models.ForeignKey(Book)
     format = models.ForeignKey(BookFormat)
@@ -271,6 +287,8 @@ class BookPublication(models.Model):
     def __unicode__(self):
         return "%s in %s" % (self.book.title, self.format.name)
 
+post_save.connect(update_book_modified, sender=BookPublication)
+
 class BookReseller(models.Model):
     name = models.CharField(max_length=200, unique=True)
     display_order = models.IntegerField()
@@ -285,6 +303,8 @@ class BookReseller(models.Model):
     def __unicode__(self):
         return self.name
 
+post_save.connect(update_book_modified, sender=BookReseller)
+
 class BookListing(models.Model):
     book = models.ForeignKey(Book)
     reseller = models.ForeignKey(BookReseller)
@@ -295,6 +315,8 @@ class BookListing(models.Model):
 
     def __unicode__(self):
         return "%s at %s" % (self.book.title, self.reseller.name)
+
+post_save.connect(update_book_modified, sender=BookListing)
 
 class SiteNewsBanner(models.Model):
     display_order = models.IntegerField("Order", default=100, help_text="Show Banners in this order")
@@ -319,6 +341,7 @@ class SitePage(models.Model):
     showinfooter = models.BooleanField("List in Footer", default=True, help_text="Show page in list at bottom")
     frontpage = models.BooleanField(default=False, help_text="Use as front page; select this for only one page")
     display_order = models.IntegerField("Order", default=100, help_text="Show page links in this order")
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["display_order"]
@@ -341,6 +364,7 @@ class StorefrontNewsCard(models.Model):
     height = models.IntegerField()
     link = models.URLField(verify_exists=False)
     description = models.TextField(help_text="Text for those who don't see the image")
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["display_order"]
@@ -361,6 +385,7 @@ class StorefrontAd(models.Model):
         ('R', 'Right (125 or 137 px wide)'),
     ))
     description = models.TextField(help_text="Text for those who don't see the image")
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["display_order"]
