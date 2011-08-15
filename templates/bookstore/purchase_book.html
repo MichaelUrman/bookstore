@@ -44,7 +44,7 @@
 <input type="hidden" name="return" value="{{LBP}}{{ purchase.get_absolute_url }}?action=purchased" />
 <input type="hidden" name="cancel_return" value="{{LBP}}{{ purchase.get_absolute_url }}?action=cancelled" />
 <input type="hidden" name="image_url" value="{{LBP}}/site_media/bookstore/style/lp_paypal.png" />{# 150 x 50 logo image #}
-<input type="hidden" name="notify_url" value="{{LBP}}/paypal/ipn" />
+<input type="hidden" name="notify_url" value="{{LBP}}{% url bookstore.views.paypal_ipn %}" />
 
 <button name="submit" style="padding: 0.5em 1em;">
 <img src="{{ pub.format.image.url }}" title="{{ pub.format.name }}" style="float:left;"/>&nbsp;<strong>{{ book.title }}</strong><br />{{ book.price }}<br /><br />

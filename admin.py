@@ -1,7 +1,7 @@
 from django.contrib import admin
 from bookstore.models import Genre, Person, MergedUser, \
     Book, BookPrice, BookReview, BookMedia, BookWallpaper, BookFormat, BookPublication, BookReseller, BookListing, \
-    SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd, Purchase
+    SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 
 class GenreAdmin(admin.ModelAdmin):
     fieldsets = [

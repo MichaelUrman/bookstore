@@ -3,6 +3,10 @@ from django.db.models.signals import post_save
 from django.core.files import File
 from datetime import datetime, date
 from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+
+import cgi
 
 # HACK: make it possible to identify openiduser records in the admin interface.
 def user_unicode(self):
@@ -395,3 +399,58 @@ class Purchase(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('bookstore.views.purchase_detail', (), dict(purchase_id=self.id))
+
+class PurchaseEmail(models.Model):
+    purchase = models.ForeignKey(Purchase)
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    link = models.CharField(max_length=256)
+    sent = models.BooleanField(default=False)
+    sent_date = models.DateTimeField(null=True)
+    
+    def __unicode__(self):
+        return '%s purchase email to %s (%s)' % (self.sent and 'Sent' or 'Unsent', self.name, self.email)
+
+def send_purchase_email(sender, **kwargs):
+    req = kwargs.get('instance')
+    created = kwargs.get('created')
+    if req and not req.sent and req.email and req.purchase:
+        message = EmailMessage()
+        message.to = req.email
+        if req.name:
+            message.to = ['"%s" <%s>' % (req.name, req.email)]
+        message.subject = "Your Lillibridge Press eBook Purchase"
+        message.from_email = "Lillibridge Press Sales <sales@lillibridgepress.com>"
+        message.body = render_to_string("bookstore/email_purchased.txt",
+            dict(name=req.name, link=req.link, book=req.purchase.publication.book))
+        
+        try:
+            message.send()
+            print "...me"
+            req.sent_date = datetime.now()
+            req.sent = True
+            req.save()
+        except Exception as e:
+            print e
+            raise
+
+        #subject, from_email, to = 'hello', 'from@example.com', 'to@example.com'
+        #text_content = 'This is an important message.'
+        #html_content = '<p>This is an <strong>important</strong> message.</p>'
+        #msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        #msg.attach_alternative(html_content, "text/html")
+        #msg.headers["Precendence"] = "bulk"
+        #msg.headers["List-Unsubscribe"] = ...
+
+post_save.connect(send_purchase_email, sender=PurchaseEmail, dispatch_uid="send_email@PurchaseEmail")
+
+class PaypalIpn(models.Model):
+    purchase = models.ForeignKey(Purchase)
+    params = models.TextField("PayPal IPN Parameters", help_text="guru only")
+    payment = models.DecimalField(max_digits=10, decimal_places=3)
+    currency = models.CharField(max_length=5, default='USD', choices=CURRENCY)
+    payment_status = models.CharField(max_length=50)
+    entered = models.DateTimeField(auto_now_add=True)
+    
+    def parse_params(self):
+        return cgi.parse_qsl(self.params)

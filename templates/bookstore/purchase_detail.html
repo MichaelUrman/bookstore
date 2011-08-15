@@ -24,5 +24,22 @@
 </form>
 {% endif %}
 </div>
+
+{% if request.user.is_staff %}
+<div class="entry ui-corner-all admin">
+<h3>IPN results</h3>
+<ul>
+{% for ipn in purchase.paypalipn_set.all %}
+<h4>{{ ipn.entered }}</h4>
+<dl>
+    {% for key, val in ipn.get_params %}
+    <dt>{{ key }}</dt><dd>{{ val }}</dd>
+    {% endfor %}
+</dl>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+
 {% endwith %}
 {% endblock content %}

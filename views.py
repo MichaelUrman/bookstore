@@ -1,19 +1,25 @@
 # bookstore views
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from bookstore.models import Genre, Person, Book, BookPublication, Purchase, MergedUser
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from django.contrib.auth.models import User
 from datetime import datetime
 from random import choice
+import urllib2
 
 # HG mail: http://lillibridgepress.com:2096
+
+PAYPAL = "https://www.sandbox.paypal.com/cgi-bin/webscr" # sandbox
+# PAYPAL = "https://www.paypal.com/cgi-bin/webscr" # real
 
 def get_migrated_object_or_404(model, migrate_values, **kwargs):
     """equivalent to get_object_or_404 with fallback checks per migrate_values mapping dict"""
@@ -195,8 +201,6 @@ def purchase_book(request, pub_id):
                         customer=request.user,
                         email=request.user.email,
                         address=request.META['REMOTE_ADDR'])
-    PAYPAL = "https://www.sandbox.paypal.com/cgi-bin/webscr" # sandbox
-    # PAYPAL = "https://www.paypal.com/cgi-bin/webscr" # real
     return render_to_response("bookstore/purchase_book.html", locals())
 
 @login_required
@@ -246,6 +250,51 @@ def user_detail(request, user_id=None):
         users = User.objects.all()
         if user_id:
             user = User.objects.get(pk=user_id)
-            purchases = get_merged_purchases(request.user).order_by("-date")
-    bookshelf = BookPublication.objects.filter(purchase__customer=user, purchase__status='R').order_by("-purchase__date")
+    purchases = get_merged_purchases(user).order_by("-date")
+    bookshelf = (purchase.publication for purchase in purchases.filter(status='R'))
     return render_to_response("bookstore/user_detail.html", locals())
+
+@require_POST
+@csrf_exempt
+def paypal_ipn(request):
+    # Verify we have a matching purchase. If not there's no point verifying the request.
+    purchase_id = request.POST.get('invoice')
+    if not purchase_id.startswith('rlbp_'):
+        return HttpResponseNotFound("Invoice Not Found")
+
+    purchase = get_object_or_404(Purchase, pk=purchase_id.strip('rlbp_'))
+
+    # Then verify the parameters from PayPal.
+    #params = str(request.raw_post_data)
+    params = request.POST.urlencode()
+    if not params:
+        return HttpResponseBadRequest()
+
+    confirm_request = urllib2.Request(PAYPAL, params + '&cmd=_notify-validate')
+    confirm_request.add_header("Content-type", "application/x-www-form-urlencoded")
+    confirm_response = urllib2.urlopen(confirm_request)
+    confirm_content = confirm_response.read()
+    if confirm_content != 'VERIFIED':
+        logging.error("Verify = %s", str(confirm_content))
+        return HttpResponseForbidden("Unverified")
+
+    # Continue onward if everything is good; record IPN parameters and verify payment amounts.
+    ipn = PaypalIpn.objects.create(purchase=purchase, params=params,
+        payment=(request.POST.get('payment_gross') or request.POST.get('mc_gross') or request.POST.get('mc_gross_1') or '0').strip('$'),
+        currency=request.POST.get('mc_currency', 'USD'),
+        payment_status=request.POST.get('payment_status'),
+    )
+
+    if purchase.price > ipn.payment:
+        return HttpResponseBadRequest("Bad Payment")
+
+    if ipn.payment_status == "Completed":
+        if purchase.status != 'R' and ipn.txn_type in ('cart', 'express_checkout', 'masspay', 'virtual_terminal', 'web_accept'):
+            purchase.status = 'R'
+            PurchaseEmail.objects.create(purchase=purchase,
+                name=request.POST.get('first_name') or request.POST.get('last_name') or 'Lillibridge Press Customer',
+                email=request.POST.get('payer_email') or purchase.customer.email,
+                link=request.build_absolute_uri(purchase.get_absolute_url()))
+            purchase.save()
+    
+    return HttpResponse("Ok")
