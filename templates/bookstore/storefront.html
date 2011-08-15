@@ -52,7 +52,7 @@
 {{block.super}}
 
 {% for ad in right_ads %}
-<div class="ui-corner-all adimage">{% if ad.link %}<a href="{{ ad.link }}">{% endif %}
+<div class="ui-corner-all adimage rightbar">{% if ad.link %}<a href="{{ ad.link }}">{% endif %}
 <img class="ui-corner-all" src="{{ ad.image.url }}" alt="{{ ad.description }}" width="{{ ad.width }}" height="{{ ad.height }}"></img>
 {% if ad.link %}</a>{% endif %}</div>
 {% endfor %}
