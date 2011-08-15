@@ -10,7 +10,7 @@
 <div id="rightbar">
 {% if bestseller %}
 <div class="ui-corner-all feature center rightbar">
-<h3>Best Sellers</h3>
+<h3>Best Seller</h3>
 <a href="{{ bestseller.get_absolute_url }}" title="Buy {{ bestseller.title }} for {{ bestseller.price }}">
     <img class="cover ui-corner-all shadow" width="125" height="187" src="{{ bestseller.page_image_small.url }}" alt="{{ bestseller.title }}'s Cover"/>
     <br/>
@@ -21,7 +21,7 @@
 
 {% if feature %}
 <div class="ui-corner-all feature center rightbar">
-<h3>Best Sellers</h3>
+<h3>Featured Title</h3>
 <a href="{{ feature.get_absolute_url }}" title="Buy {{ feature.title }} for {{ feature.price }}">
     <img class="cover ui-corner-all shadow" width="125" height="187" src="{{ feature.page_image_small.url }}" alt="{{ feature.title }}'s Cover"/>
     <br/>
