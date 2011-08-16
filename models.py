@@ -1,12 +1,13 @@
 from django.db import models
 from django.core.files import File
-from datetime import datetime, date
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from decimal import Decimal, ROUND_UP
 
 import cgi
+from datetime import datetime, date
+import logging
 
 # HACK: make it possible to identify openiduser records in the admin interface.
 def user_unicode(self):
@@ -404,7 +405,7 @@ def receiver(signal, **kwargs):
 def send_purchase_email(sender, **kwargs):
     purchase = kwargs.get('instance')
     created = kwargs.get('created')
-    if purchase and purchase.status = 'R' and not purchase.email_sent and purchase.email_address:
+    if purchase and purchase.status == 'R' and not purchase.email_sent and purchase.email_address:
         message = EmailMessage()
         message.to = purchase.email_address
         if purchase.email_name:

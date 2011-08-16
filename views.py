@@ -13,7 +13,9 @@ from bookstore.models import Genre, Person, Book, BookPublication
 from bookstore.models import Purchase, MergedUser, PaypalIpn
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from django.contrib.auth.models import User
+
 from datetime import datetime
+import logging
 from random import choice
 import urllib2
 
