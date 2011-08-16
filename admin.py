@@ -104,16 +104,16 @@ class SitePageAdmin(admin.ModelAdmin):
 
 class StorefrontNewsCardAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {"fields": ["link", "description", "image", "display_order", "visible"]}),
+        (None, {"fields": ["description", "link", "image", "display_order", "visible"]}),
     ]
-    list_display = ("link", "description", "image", "display_order", "visible")
+    list_display = ("description", "link", "image", "display_order", "visible")
     list_editable = ("image", "display_order", "visible")
 
 class StorefrontAdAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {"fields": ["link", "column", "description", "image", "display_order", "visible"]}),
+        (None, {"fields": ["description", "link", "column", "image", "display_order", "visible"]}),
     ]
-    list_display = ("link", "column", "description", "image", "display_order", "visible")
+    list_display = ("description", "link", "column", "image", "display_order", "visible")
     list_editable = ("image", "column", "display_order", "visible")
     
 admin.site.register(Genre, GenreAdmin)
