@@ -4,6 +4,7 @@ from datetime import datetime, date
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from decimal import Decimal, ROUND_UP
 
 import cgi
 
@@ -131,9 +132,9 @@ class Book(models.Model):
         return self.publish_date <= date.today()
 
     @property
-    def price(self):
+    def price(self, quantum=Decimal('.01')):
         for price in self.price_set.filter(currency='USD'):
-            return "%s%s" % (price.symbol, price.price)
+            return "%s%s" % (price.symbol, price.price.quantize(quantum, rounding=ROUND_UP))
         return 'ERROR'
 
     @property
