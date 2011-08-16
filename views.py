@@ -298,7 +298,7 @@ def paypal_ipn(request):
             return HttpResponseBadRequest("Bad Payment")
 
         if ipn.payment_status == "Completed":
-            if purchase.status != 'R' and ipn.txn_type in ('cart', 'express_checkout', 'masspay', 'virtual_terminal', 'web_accept'):
+            if purchase.status != 'R' and request.POST.get('txn_type') in ('cart', 'express_checkout', 'masspay', 'virtual_terminal', 'web_accept'):
                 purchase.status = 'R'
                 if not purchase.email_sent:
                     purchase.email_name = request.POST.get('first_name') or request.POST.get('last_name') or 'Lillibridge Press Customer'
