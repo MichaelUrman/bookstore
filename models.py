@@ -362,7 +362,11 @@ class Purchase(models.Model):
     email = models.EmailField()
     date = models.DateTimeField(auto_now_add=True)
     address = models.CharField(max_length=256)
-    downloads_remaining = models.IntegerField(default=3)
+    email_name = models.CharField(max_length=200, blank=True)
+    email_address = models.EmailField(blank=True)
+    email_link = models.CharField(max_length=256, blank=True)
+    email_sent = models.BooleanField(default=False)
+    email_sent_date = models.DateTimeField(null=True)
 
     class Meta:
         ordering = ["date"]
@@ -373,17 +377,6 @@ class Purchase(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('bookstore.views.purchase_detail', (), dict(purchase_id=self.id))
-
-class PurchaseEmail(models.Model):
-    purchase = models.ForeignKey(Purchase)
-    name = models.CharField(max_length=200)
-    email = models.EmailField()
-    link = models.CharField(max_length=256)
-    sent = models.BooleanField(default=False)
-    sent_date = models.DateTimeField(null=True)
-    
-    def __unicode__(self):
-        return '%s purchase email to %s (%s)' % (self.sent and 'Sent' or 'Unsent', self.name, self.email)
 
 class PaypalIpn(models.Model):
     purchase = models.ForeignKey(Purchase)
@@ -407,29 +400,27 @@ def receiver(signal, **kwargs):
         return handler
     return connector
         
-@receiver(post_save, sender=PurchaseEmail, dispatch_uid="send_purchase_email@PurchaseEmail")
+@receiver(post_save, sender=Purchase, dispatch_uid="send_purchase_email@Purchase")
 def send_purchase_email(sender, **kwargs):
-    req = kwargs.get('instance')
+    purchase = kwargs.get('instance')
     created = kwargs.get('created')
-    if req and not req.sent and req.email and req.purchase:
+    if purchase and purchase.status = 'R' and not purchase.email_sent and purchase.email_address:
         message = EmailMessage()
-        message.to = req.email
-        if req.name:
-            message.to = ['"%s" <%s>' % (req.name, req.email)]
+        message.to = purchase.email_address
+        if purchase.email_name:
+            message.to = ['"%s" <%s>' % (purchase.email_name, purchase.email_address)]
         message.subject = "Your Lillibridge Press eBook Purchase"
         message.from_email = "Lillibridge Press Sales <sales@lillibridgepress.com>"
         message.body = render_to_string("bookstore/email_purchased.txt",
-            dict(name=req.name, link=req.link, book=req.purchase.publication.book))
+            dict(purchase=purchase, book=purchase.publication.book))
         
         try:
             message.send()
-            print "...me"
-            req.sent_date = datetime.now()
-            req.sent = True
-            req.save()
+            purchase.email_sent_date = datetime.now()
+            purchase.email_sent = True
+            purchase.save()
         except Exception as e:
-            print e
-            raise
+            logging.exception("Purchase Email")
 
         #subject, from_email, to = 'hello', 'from@example.com', 'to@example.com'
         #text_content = 'This is an important message.'

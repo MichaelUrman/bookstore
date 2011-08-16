@@ -31,11 +31,11 @@
 <ul>
 {% for ipn in purchase.paypalipn_set.all %}
 <h4>{{ ipn.entered }}</h4>
-<dl>
-    {% for key, val in ipn.get_params %}
-    <dt>{{ key }}</dt><dd>{{ val }}</dd>
+<div style="max-height: 12em; overflow-y: scroll; border: inset 2px #ccc; background-color: #ccc; color: #000;">
+    {% for key, val in ipn.parse_params %}
+    <strong>{{ key }}:</strong> {{ val }}<br/>
     {% endfor %}
-</dl>
+</div>
 {% endfor %}
 </ul>
 </div>

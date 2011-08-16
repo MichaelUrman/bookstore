@@ -1,10 +1,10 @@
-Dear {{ name }},
+Dear {{ purchase.email_name }},
 
 Thank you for purchasing {{ book.title }} from Lillibridge Press. The link to this file will be active for 24 hours, granting you access to three downloads.
 
 Your eBook can be downloaded at:
 
-{{ link }}
+{{ purchase.email_link }}
 
 Thank You,
 Lillibridge Press

@@ -9,7 +9,8 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from bookstore.models import Genre, Person, Book, BookPublication, Purchase, MergedUser
+from bookstore.models import Genre, Person, Book, BookPublication
+from bookstore.models import Purchase, MergedUser, PaypalIpn
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -259,44 +260,52 @@ def user_detail(request, user_id=None):
 @require_POST
 @csrf_exempt
 def paypal_ipn(request):
-    # Verify we have a matching purchase. If not there's no point verifying the request.
-    purchase_id = request.POST.get('invoice')
-    if not purchase_id.startswith('rlbp_'):
-        return HttpResponseNotFound("Invoice Not Found")
+    try:
+        # Verify we have a matching purchase. If not there's no point verifying the request.
+        purchase_id = request.POST.get('invoice')
+        if not purchase_id.startswith('rlbp_'):
+            logging.error("IPN: Invoice %s not found" % purchase_id)
+            return HttpResponseNotFound("Invoice Not Found")
 
-    purchase = get_object_or_404(Purchase, pk=purchase_id.strip('rlbp_'))
+        purchase = get_object_or_404(Purchase, pk=purchase_id.strip('rlbp_'))
 
-    # Then verify the parameters from PayPal.
-    #params = str(request.raw_post_data)
-    params = request.POST.urlencode()
-    if not params:
-        return HttpResponseBadRequest()
+        # Then verify the parameters from PayPal.
+        #params = str(request.raw_post_data)
+        params = request.POST.urlencode()
+        if not params:
+            logging.error("IPN: No parameters")
+            return HttpResponseBadRequest()
 
-    confirm_request = urllib2.Request(PAYPAL, params + '&cmd=_notify-validate')
-    confirm_request.add_header("Content-type", "application/x-www-form-urlencoded")
-    confirm_response = urllib2.urlopen(confirm_request)
-    confirm_content = confirm_response.read()
-    if confirm_content != 'VERIFIED':
-        logging.error("Verify = %s", str(confirm_content))
-        return HttpResponseForbidden("Unverified")
+        confirm_request = urllib2.Request(PAYPAL, params + '&cmd=_notify-validate')
+        confirm_request.add_header("Content-type", "application/x-www-form-urlencoded")
+        confirm_response = urllib2.urlopen(confirm_request)
+        confirm_content = confirm_response.read()
+        if confirm_content != 'VERIFIED':
+            logging.error("IPN: Paypal claims: %s", str(confirm_content)[:40])
+            return HttpResponseForbidden("Unverified")
 
-    # Continue onward if everything is good; record IPN parameters and verify payment amounts.
-    ipn = PaypalIpn.objects.create(purchase=purchase, params=params,
-        payment=(request.POST.get('payment_gross') or request.POST.get('mc_gross') or request.POST.get('mc_gross_1') or '0').strip('$'),
-        currency=request.POST.get('mc_currency', 'USD'),
-        payment_status=request.POST.get('payment_status'),
-    )
+        # Continue onward if everything is good; record IPN parameters and verify payment amounts.
+        ipn = PaypalIpn.objects.create(purchase=purchase, params=params,
+            payment=(request.POST.get('payment_gross') or request.POST.get('mc_gross') or request.POST.get('mc_gross_1') or '0').strip('$'),
+            currency=request.POST.get('mc_currency', 'USD'),
+            payment_status=request.POST.get('payment_status'),
+        )
 
-    if purchase.price > ipn.payment:
-        return HttpResponseBadRequest("Bad Payment")
+        if purchase.price > ipn.payment:
+            logging.error("IPN: Payment %s smaller than Price %s" % (ipn.payment, purchase.price))
+            return HttpResponseBadRequest("Bad Payment")
 
-    if ipn.payment_status == "Completed":
-        if purchase.status != 'R' and ipn.txn_type in ('cart', 'express_checkout', 'masspay', 'virtual_terminal', 'web_accept'):
-            purchase.status = 'R'
-            PurchaseEmail.objects.create(purchase=purchase,
-                name=request.POST.get('first_name') or request.POST.get('last_name') or 'Lillibridge Press Customer',
-                email=request.POST.get('payer_email') or purchase.customer.email,
-                link=request.build_absolute_uri(purchase.get_absolute_url()))
-            purchase.save()
+        if ipn.payment_status == "Completed":
+            if purchase.status != 'R' and ipn.txn_type in ('cart', 'express_checkout', 'masspay', 'virtual_terminal', 'web_accept'):
+                purchase.status = 'R'
+                if not purchase.email_sent:
+                    purchase.email_name = request.POST.get('first_name') or request.POST.get('last_name') or 'Lillibridge Press Customer'
+                    purchase.email_address = request.POST.get('payer_email') or purchase.customer.email
+                    purchase.email_link = request.build_absolute_uri(purchase.get_absolute_url())
+                purchase.save()
+
+    except Exception:
+        logging.exception("IPN")
+        raise
     
     return HttpResponse("Ok")
