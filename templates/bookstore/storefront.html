@@ -17,9 +17,9 @@
     </ul>
     {% for card in cards %}
     <div id="card{{ card.id }}" class="card ui-corner-all ui-tabs-panel ui-widget-content{% if not forloop.first %} ui-tabs-hide{% endif %}">
-        <a href="{{ card.link }}">
+        {% if card.link %}<a href="{{ card.link }}">{% endif %}
             <img src="{{ card.image.url }}" class="card ui-corner-all" alt="{{ card.description }}" width="{{ card.width }}" height="{{ card.height }}"/>
-        </a>
+        {% if card.link %}</a>{% endif %}
     </div>
     {% endfor %}
 </div{# cards #}>

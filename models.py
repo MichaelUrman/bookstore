@@ -312,7 +312,7 @@ class StorefrontNewsCard(models.Model):
     image = models.ImageField(upload_to='bookstore/img/card', width_field="width", height_field="height")
     width = models.IntegerField()
     height = models.IntegerField()
-    link = models.URLField(verify_exists=False)
+    link = models.URLField(verify_exists=False, blank=True)
     description = models.TextField(help_text="Text for those who don't see the image")
     modified = models.DateTimeField(auto_now=True)
 
@@ -328,7 +328,7 @@ class StorefrontAd(models.Model):
     image = models.ImageField(upload_to='bookstore/img/card', width_field="width", height_field="height")
     width = models.IntegerField()
     height = models.IntegerField()
-    link = models.URLField(verify_exists=False)
+    link = models.URLField(verify_exists=False, blank=True)
     column = models.CharField(max_length=5, choices=(
         ('L', 'Left (165 px wide)'),
         ('C', 'Center (600 px wide)'),
