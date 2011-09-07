@@ -172,6 +172,24 @@ migrate_genres = dict(
     magic_occult="magick_occult",
 )
 
+try:
+    import django_openid_auth.views as openid_views
+except ImportError:
+    openid_views = None
+    
+def openid_login(request):
+    if not openid_views:
+        raise Http404
+    return openid_views.login_begin(request, template_name='bookstore/openid_login.html')
+
+def openid_failure(request, message, status=403):
+    return openid_views.default_render_failure(request, message, status, template_name='bookstore/openid_failure.html')
+
+def openid_complete(request):
+    if not openid_views:
+        raise Http404
+    return openid_views.login_complete(request, render_failure=openid_failure)
+
 def signin(request, next='bookstore.views.storefront'):
     next = request.GET.get("next", next)
     login(request)

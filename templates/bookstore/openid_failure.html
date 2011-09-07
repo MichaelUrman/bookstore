@@ -1,0 +1,14 @@
+{% extends "bookstore/base.html" %}
+
+{% load i18n %}
+
+{% block title %}Login Failure - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all">
+
+<h4 class="error">Login failed</h4>
+<p>{{ message }}</p>
+<p><a href="javascript:history.go(-1);">Try again.</a></p>
+</div>
+{% endblock content %}

@@ -1,0 +1,34 @@
+{% extends "bookstore/base.html" %}
+
+{% load i18n %}
+
+{% block title %}Login - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all">
+
+{% if form.errors %}
+<p class="errors">{% trans "Please correct errors below:" %}<br />
+    {% if form.openid_identifier.errors %}
+    <span class="error">{{ form.openid_identifier.errors|join:", " }}</span>
+    {% endif %}
+    {% if form.next.errors %}
+    <span class="error">{{ form.next.errors|join:", " }}</span>
+    {% endif %}
+</p>
+{% endif %}
+
+<p>You must sign in to continue. Click the button below to sign in.</p>
+
+<form name="fopenid" action="{{ action }}" method="post" class="center">
+    {% csrf_token %}
+    {% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+    
+    <button accesskey="g" name="openid_identifier" type="submit" value='https://www.google.com/accounts/o8/id'><img src="http://www.google.com/favicon.ico" style="float: left; margin: 0.8em 0.5em 0.8em 0;"></img>Sign in with your<br /><strong>G</strong>oogle&#x2122; Account</button>
+</form>
+
+<p>You will be asked to allow Lillibridge Press to see your email address. Lillibridge Press will not receive access to your Google&#x2122; account. If you wish to continue, you must approve sharing your email address by selecting <strong>Allow</strong>.</p>
+</div>
+{% endblock content %}

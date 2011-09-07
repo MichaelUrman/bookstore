@@ -23,6 +23,9 @@ Setup
 
         # in urls
         (r'^openid/', include('django_openid_auth.urls')),
+        # or to use bookstore pages (which limit you to Google's server for now):
+        url(r'^openid/login/$', 'bookstore.views.openid_login', name='openid-login'),
+        url(r'^openid/complete/$', 'bookstore.views.openid_complete', name='openid-complete'),
         
         # in settings
         INSTALLED_APPS += 'django_openid_auth',
@@ -34,10 +37,11 @@ Setup
         
         OPENID_CREATE_USERS = True
         OPENID_UPDATE_DETAILS_FROM_SREG = True
+        OPENID_UPDATE_DETAILS_FROM_AX = True
         LOGIN_URL = '/openid/login/'
         LOGIN_REDIRECT_URL = '/'
         # OPENID_USE_AS_ADMIN_LOGIN = True # optional; use only once an openid has admin access
-
+        
 * Sync the database:
 
         % manage.py syncdb
