@@ -50,7 +50,7 @@
 {% block rightbar %}
 {% block bookshelf %}
 <div class="rightbar ui-corner-all" id="user">
-    <h3 style="margin:0 0 0.5em 0" class="center">{% if request.user.is_authenticated %}{{ request.user.first_name }}'s{% else %}My{% endif %} Bookshelf</h3>
+    <h3 style="margin:0 0 0.5em 0" class="center">{% if request.user.is_authenticated %}{{ request.user.first_name }}'s{% else %}My{% endif %} eBookshelf</h3>
     {% if request.user.is_authenticated %}
     <div id="righttoolbar" class="ui-priority-secondary">
     <a href="{% url bookstore.views.user_detail "" %}" title="Signed in as {{ request.user.get_full_name }} ({{ request.user.email }})"><button class="ui-icon ui-icon-person">Signed in as {{ request.user.get_full_name }} ({{ request.user.email }})</button></a>
