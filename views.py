@@ -152,6 +152,14 @@ migrate_books = dict(
     violin_s_cry="A_Violin_s_Cry",
 )
 
+def coming_soon(request):
+    upcoming_books = Book.objects.filter(visible=True, upcoming=True, publish_date__gte=datetime.now).order_by("publish_date")
+    bookpager = Pager(request, upcoming_books.count())
+    if not bookpager.count:
+        return redirect("bookstore.views.storefront", permanent=False)
+    books = upcoming_books[bookpager.slice]
+    return render_to_response("bookstore/coming_soon.html", locals())
+
 def genre_list(request):
     all_genres = Genre.objects.filter(visible=True).order_by("name")
     genrepager = Pager(request, all_genres.count(), pagesize=25)

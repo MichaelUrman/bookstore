@@ -10,6 +10,7 @@ urlpatterns = patterns('bookstore.views',
     (r'^book/$', 'book_list'),
     (r'^book/(?P<book_link>[\w-]+)$', 'book_detail'),
     (r'^book/(?P<migrate_url>[^/]+)/(?P<book_link>[\w-]+)$', 'book_detail'), # migrate old urls
+    (r'^coming-soon/$', 'coming_soon'),
     url(r'^signin/$', 'openid_login', name='openid-login'),
     url(r'^signin/complete/$', 'openid_complete', name='openid-complete'),
     (r'^signout/$', 'signout'),

@@ -38,6 +38,7 @@
 {% for book in upcoming_books %}
     {% bookcard book %}
 {% endfor %}
+<div><a href="{% url bookstore.views.coming_soon %}">See all upcoming releases</a></div>
 </div>
 {% endif %}
 

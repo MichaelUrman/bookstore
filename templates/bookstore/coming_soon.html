@@ -1,0 +1,19 @@
+{% extends "bookstore/base.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}Coming Soon - {{ block.super }}{% endblock %}
+
+{% block content %}
+{% if books.count %}
+{# books of this genre, ordered by xxx. include picture (expandable), short description, and link to publication page #}
+<h3 class="bridge"><span>Coming Soon</span></h3>
+<div class="entry grid ui-corner-all">
+{% for book in books %}
+    {% bookcard book %}
+{% endfor %}
+</div>
+{% pager bookpager %}
+{% endif %}
+
+{% endblock content %}
