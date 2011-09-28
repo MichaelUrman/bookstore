@@ -31,11 +31,11 @@
 {% pager bookpager %}
 {% endif %}
 
-{% if upcoming.count %}
+{% if upcoming_books.count %}
 {# upcoming releases of this genre, ordered by expected release #}
 <h3 class="bridge"><span>Upcoming <em>{{ genre.name }}</em> Releases</span></h3>
 <div class="entry grid ui-corner-all">
-{% for book in upcoming %}
+{% for book in upcoming_books %}
     {% bookcard book %}
 {% endfor %}
 </div>

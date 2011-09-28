@@ -163,6 +163,7 @@ def genre_detail(request, genre_link):
     if genre.link != genre_link:
         return redirect(genre, permanent=True)
     all_books = genre.book_set.filter(visible=True, publish_date__lte=datetime.now)
+    upcoming_books = genre.book_set.filter(visible=True, upcoming=True, publish_date__gte=datetime.now).order_by("publish_date")
     bookpager = Pager(request, all_books.count())
     books = all_books[bookpager.slice]
     link = request.build_absolute_uri()
