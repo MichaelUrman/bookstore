@@ -1,5 +1,7 @@
 # bookstore views
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
+from django.core.servers.basehttp import FileWrapper
+from django.core.urlresolvers import reverse
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -10,11 +12,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from bookstore.models import Genre, Person, Book, BookPublication
-from bookstore.models import Purchase, MergedUser, PaypalIpn
+from bookstore.models import Purchase, MergedUser, PaypalIpn, Download
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from django.contrib.auth.models import User
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from random import choice
 import urllib2
@@ -236,8 +238,44 @@ def purchase_book(request, pub_id):
     return render_to_response("bookstore/purchase_book.html", locals())
 
 @login_required
+def download_book(request, pub_id):
+    pub = get_object_or_404(BookPublication, pk=pub_id)
+    purchases = get_merged_purchases(request.user, publication=pub)
+    
+    # see if there's a ready purchase under this user's merged account
+    try:
+        purchase = purchases.filter(status='R').latest('date')
+    except Purchase.DoesNotExist:
+        # see if there's something pending or submitted; if so jump to purchase detail
+        try:
+            unready = purchases.filter(status='S').latest('date')
+        except Purchase.DoesNotExist:
+            # if nothing available, jump to opportunity to purchase the book
+            book = pub.book
+            return render_to_response("bookstore/download_unpurchased.html", locals())
+        else:
+            return redirect(unready, permanent=False)
+
+    # since there's a ready purchase, check for abusive download patterns
+    now = datetime.now()
+    downloads = purchase.download_set
+    lastweek = downloads.filter(timestamp__gte=now - timedelta(days=7))
+    lastmonth = downloads.filter(timestamp__gte=now - timedelta(days=30))
+    if lastweek.count() >= 5 or lastmonth.count() >= 8:
+        book = pub.book
+        return render_to_response("bookstore/download_limit.html", locals())
+    
+    # return the content of the download - serve the file
+    from os import path
+    response = HttpResponse(FileWrapper(open(pub.data.path, "rb")), content_type=pub.format.mime)
+    response["Content-Length"] = path.getsize(pub.data.path)
+    response['Content-Disposition'] = 'attachment; filename=%s [%s].%s' % (pub.book.title, pub.book.publish_date.year, pub.format.extension)
+    Download.objects.create(purchase=purchase, ipaddress=request.META.get("REMOTE_ADDR"))
+    return response
+
+@login_required
 def purchase_listing(request):
-    purchases = get_merged_purchases(request.user).order_by("-date")
+    purchases = get_merged_purchases(request.user).filter(status__in="RS").order_by("-date")
     return render_to_response("bookstore/purchase_listing.html", locals())
 
 @login_required
@@ -330,7 +368,7 @@ def paypal_ipn(request):
                 if not purchase.email_sent:
                     purchase.email_name = request.POST.get('first_name') or request.POST.get('last_name') or 'Lillibridge Press Customer'
                     purchase.email_address = request.POST.get('payer_email') or purchase.customer.email
-                    purchase.email_link = request.build_absolute_uri(purchase.get_absolute_url())
+                    purchase.email_link = request.build_absolute_uri(purchase.get_download_url())
                 purchase.save()
 
     except Exception:

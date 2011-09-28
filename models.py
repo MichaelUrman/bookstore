@@ -378,6 +378,10 @@ class Purchase(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('bookstore.views.purchase_detail', (), dict(purchase_id=self.id))
+        
+    @models.permalink
+    def get_download_url(self):
+        return ('bookstore.views.download_book', (), dict(pub_id=self.publication.id))
 
 class PaypalIpn(models.Model):
     purchase = models.ForeignKey(Purchase)
@@ -389,6 +393,11 @@ class PaypalIpn(models.Model):
     
     def parse_params(self):
         return cgi.parse_qsl(self.params)
+
+class Download(models.Model):
+    purchase = models.ForeignKey(Purchase)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ipaddress = models.IPAddressField()
 
 #
 # Signal handling

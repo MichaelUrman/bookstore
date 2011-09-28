@@ -23,6 +23,10 @@
 <button>Go</button>
 </form>
 {% endif %}
+
+{% if purchase.status == 'R' %}
+<div class="center"><a href="{% url bookstore.views.download_book purchase.publication.id %}"><button>Download {{ book.title }}</button></a></div>
+{% endif %}
 </div>
 
 {% if request.user.is_staff %}

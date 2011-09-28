@@ -1,0 +1,23 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}{{ book.title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+{% with book.get_absolute_url as booklink %}
+<div class="entry ui-corner-all" id="purchase">
+<a href="{{ booklink }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" /></a><br/>
+<h3>Error downloading <em>{{ book.title }}</em></h3>
+<p>You have downloaded <strong><a href="{{ booklink }}">{{ book.title }}</a></strong> too many times recently. Please wait a while and try downloading again.</p>
+<p>If you have been unable to download your book, or believe you have received this message in error, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Download Error (id={{purchase.id}})">support@lillibridgepress.com</a>.</p>
+
+{% if request.user.is_staff %}
+<div class="admin" style="clear: left"><ul>
+{% for download in lastmonth %}
+<li>{{ download.timestamp }}: {{ download.ipaddress }}</li>
+{% endfor %}
+</ul></div>
+{% endif %}
+</div>
+
+{% endwith %}
+{% endblock content %}
