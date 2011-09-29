@@ -275,7 +275,9 @@ def download_book(request, pub_id):
 
 @login_required
 def purchase_listing(request):
-    purchases = get_merged_purchases(request.user).filter(status__in="RS").order_by("-date")
+    purchases = get_merged_purchases(request.user).order_by("-date")
+    if not request.user.is_staff:
+        purchases = purchases.filter(status__in="RS")
     return render_to_response("bookstore/purchase_listing.html", locals())
 
 @login_required
