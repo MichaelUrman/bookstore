@@ -8,8 +8,7 @@
 
 {% block rightbar %}
 <div id="fbg">
-{% url bookstore.views.storefront as siteurl %}
-{% fbrec siteurl "genre" genre.link %}
+{% fbrec request.get_host "genre" genre.link %}
 </div>
 {{block.super}}{% endblock rightbar %}
 

@@ -237,6 +237,10 @@ class BookPublication(models.Model):
     def get_purchase_url(self):
         return ('bookstore.views.purchase_book', (), dict(pub_id=self.id))
 
+    @models.permalink
+    def get_download_url(self):
+        return ('bookstore.views.download_book', (), dict(pub_id=self.id))
+
     class Meta:
         unique_together = ("book", "format")
 
