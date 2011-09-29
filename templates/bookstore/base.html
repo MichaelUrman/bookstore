@@ -47,8 +47,18 @@
 </div>
 <div id="left">{% block leftbar %}<div id="sidebar" class="ui-corner-all bshadow">{% block sidebar %}{% genre_sidebar %}{% author_sidebar %}{% endblock sidebar %}</div{#sidebar#}>{% endblock leftbar %}</div{#left#}>
 <div id="right"><div id="rightbar" class="ui-corner-all">
+<div class="rightbar ui-corner-all" id="user">
+{% if request.user.is_authenticated %}
+Welcome, {{ request.user.first_name }}.
+<ul style="margin:0"><li><a href="{% url bookstore.views.signout %}?next={{ request.path }}" title="Sign out of Lillibridge Press">Sign&nbsp;out</a></li></ul>
+{% else %}
+Welcome to Lillibridge Press.
+<a href="{% url bookstore.views.signin %}?next={{ request.path }}" title="Sign in to Lillibridge Press">Sign in here</a>.
+{% endif %}
+</div>
 {% block rightbar %}
 {% block bookshelf %}
+{% if 0 %}
 <div class="rightbar ui-corner-all" id="user">
     <h3 style="margin:0 0 0.5em 0" class="center">{% if request.user.is_authenticated %}{{ request.user.first_name }}'s{% else %}My{% endif %} eBookshelf</h3>
     {% if request.user.is_authenticated %}
@@ -65,6 +75,7 @@
     </div>
     {% endif %}
 </div>
+{% endif %}
 {% endblock bookshelf %}
 <iframe class="feature rightbar" src="{% url bookstore.views.site_picks %}" width="155" height="545" allowtransparency="true" frameborder="0" scrolling="no"></iframe>
 {% endblock rightbar %}
@@ -73,6 +84,11 @@
 
 <div id="footer" class="ui-corner-all bshadow">{% block footer %}
     {% site_footnav %}
+    {% if request.user.is_authenticated %}
+    | <a href="{% url bookstore.views.signout %}?next={{ request.path }}" title="Sign out of Lillibridge Press">Sign out</a>
+    {% else %}
+    | <a href="{% url bookstore.views.signin %}?next={{ request.path }}" title="Sign in to Lillibridge Press">Sign in</a>
+    {% endif %}
     <br />
     &#x2756; Copyright &copy; Lillibridge Press &#x2756; All Rights Reserved &#x2756;
 {% endblock footer %}</div{# id="footer"#}>

@@ -209,6 +209,7 @@ def signin(request, next='bookstore.views.storefront'):
 def signout(request, next='bookstore.views.storefront'):
     next = request.GET.get("next", next)
     logout(request)
+    return redirect(next)
     return render_to_response("bookstore/signout.html", locals())
 
 @login_required
