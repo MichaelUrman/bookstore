@@ -140,7 +140,7 @@ class Book(models.Model):
 
     @property
     def is_free(self):
-        return self.price.upper() == "FREE"
+        return self.price == "$0.00" or self.price.upper() == "FREE"
 
     def publications_by_format(self):
         return self.bookpublication_set.filter(format__visible=True).order_by('format__display_order').all()
@@ -350,6 +350,7 @@ class StorefrontAd(models.Model):
 class Purchase(models.Model):
     transaction = models.CharField(max_length=10, default='P', choices=(
         ('P', 'Purchase'),
+        ('F', 'Free Purchase'),
         ('R', 'Replace'),
         ('V', 'Review'),
     ))

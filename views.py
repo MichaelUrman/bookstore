@@ -227,15 +227,24 @@ def purchase_book(request, pub_id):
         raise Http404
 
     book = pub.book
+    status = 'P'
+    transaction = 'P'
+    free_purchase = book.is_free
+    if free_purchase:
+        transaction = 'F'
+        status = 'R'
     bookprice = book.price_set.get(currency='USD')
-    purchase = Purchase.objects.create(transaction='P',
+    purchase = Purchase.objects.create(transaction=transaction,
                         price=bookprice.price,
                         currency=bookprice.currency,
                         publication=pub,
-                        status='P',
+                        status=status,
                         customer=request.user,
                         email=request.user.email,
-                        address=request.META['REMOTE_ADDR'])
+                        address=request.META['REMOTE_ADDR'],
+                        email_sent=free_purchase)
+    if free_purchase:
+        return redirect(purchase.get_download_url())
     return render_to_response("bookstore/purchase_book.html", locals())
 
 @login_required
