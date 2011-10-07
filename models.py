@@ -373,6 +373,14 @@ class Purchase(models.Model):
     email_link = models.CharField(max_length=256, blank=True)
     email_sent = models.BooleanField(default=False)
     email_sent_date = models.DateTimeField(null=True)
+    
+    @property
+    def book(self):
+        return self.publication.book
+        
+    @property
+    def format(self):
+        return self.publication.format
 
     class Meta:
         ordering = ["date"]

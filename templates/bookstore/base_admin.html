@@ -1,0 +1,25 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}Administration - {{ block.super }}{% endblock %}
+{% block css %}{{ block.super }}<link rel="stylesheet" href="/site_media/bookstore/style/lpadmin.css" />{% endblock %}
+{% block htmlclass %} class="admin"{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+Links:
+<ul>
+    <li><a href="https://www.google.com/a/lillibridgepress.com">Google Apps Login</a></li>
+    <li><a href="http://mail.google.com/a/lillibridgepress.com">Google Mail Login</a></li>
+    <li><a href="https://www.google.com/a/cpanel/lillibridgepress.com/Dashboard">Google Apps CPanel</a></li>
+    <li><a href="http://www.mail.lillibridgepress.com/">Old Mail</a></li>
+    <li><a href="http://lillibridgepress.com:2082/frontend/x3/index.php">Host Gator CPanel</a></li>
+</ul>
+TODO:
+<ul>
+    <li>Admin summary of sales, freebies, emails, downloads of books</li>
+    <li>Page hit log viewer (Analytics?)</li>
+    <li>Affiliates (perhaps just img support in markup)</li>
+    <li>Mobile Support?</li>
+    <li>Discoverability of Book Cover Hover</li>
+</ul>
+{% endblock footer %}

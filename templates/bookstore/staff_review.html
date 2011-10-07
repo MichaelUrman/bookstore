@@ -1,0 +1,48 @@
+{% extends "bookstore/base_admin.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}Reviews - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all" style="overflow: auto">
+<h3>Send Review Copies</h3>
+
+<form method="post" id="send-review">
+{% csrf_token %}
+{% if error %}<h3 class="error">{{ error }}</h3>{% endif %}
+<div><label for="email">Email:</label><input name="email" id="email" value="{{ email }}"/></div>
+<div><label for="name">Name:</label><input name="name" id="name" value="{{ name }}"/></div>
+<div><label for="publication">Book:</label><select name="publication" id="publication">
+    <option value=""></option>
+    {% for book in books %}
+    {% if book.bookpublication_set %}
+    <optgroup label="{{ book.title }}{% if not book.is_published %} (upcoming){% endif %}">
+        {% for pub in book.bookpublication_set.all %}
+        <option value="{{ pub.id }}">{{book.title}} ({{pub.format.name}})</option>
+        {% endfor %}
+    </optgroup>
+    {% endif %}
+    {% endfor %}
+</select></div>
+<div><label for="message">Message:</label><textarea name="message" id="message" rows="6" cols="60">{% if message %}{{ message }}{% else %}Dear __name__,
+
+Here is your review copy of Lillibridge Press's __title__ for your consideration. The link to this file will be active for 24 hours, granting you access to three downloads.
+
+Your eBook can be downloaded at:
+
+__link__
+
+Thank You,
+Lillibridge Press{% endif %}</textarea></div>
+<button id="review" style="float:right" type="submit" name="op" value="review">Send Free Copy</button>
+</form>
+</div>
+{% endblock content %}
+
+{% block onready %}{{block.super}}
+$("button").button();
+$("#wiki").html("<p><strong>Message Replacements</strong></p><p>__name__: customer name<br />__title__: book title<br />__link__: download link</p>");
+$("select[name='publication']").val("{{publication}}");
+$(".tabs").tabs({collapsible: true}).tabs('select', 0);
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "bookstore/base_admin.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}Purchases - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all" style="overflow: auto">
+<h3>Recent Purchases (<a href="{{ toggle_pending }}">toggle pending</a>)</h3>
+<form method="post">
+<input type="hidden" name="op" value="give" />
+<table class="purchases">
+<tbody>
+<tr>
+    <th>Date&nbsp;{% sort request "date" %}</th>
+    <th>Kind&nbsp;{% sort request "transaction" %}</th>
+    <th>Book&nbsp;{% sort request "publication__book" %}</th>
+    <th>Format&nbsp;{% sort request "publication__format" %}</th>
+    <th>Status&nbsp;{% sort request "status" %}</th>
+    <th>Price&nbsp;{% sort request "price" %}</th>
+    <th>How&nbsp;{% sort request "customer" %}</th>
+    <th>Downloads&nbsp;{% sort request "downloads" %}</th>
+</tr>
+{% for purchase in purchases %}
+{% ifchanged purchase.date.date %}
+<tr><th colspan="9" class="date">{{ purchase.date|date:"l, Y-m-d" }}</th></tr>
+{% endifchanged %}
+<tr>
+    <td>{{ purchase.date|time:"G:i" }}</td>
+    <td title="{{ purchase.get_transaction_display }}">{{ purchase.transaction }}</td>
+    <td><a href="{{ purchase.book.get_absolute_url }}">{{ purchase.book.title }}</a></td>
+    <td>{{ purchase.publication.format.name }}</td>
+    <td title="{{ purchase.get_status_display }}">{{ purchase.status }}</td>
+    <td>{{ purchase.price }}</td>
+    <td>{% if purchase.customer %}Bought by <span title="{{ purchase.email }}">{{ purchase.customer.first_name }}</span> on {{ purchase.address }}
+        {% else %}{% if purchase.admin %}Sent by {{ purchase.admin.first_name }} to {{ purchase.email }} from {{ purchase.address }}{% endif %}
+        {% endif %}</td>
+    <td>{% with purchase.download_set.count as download_count %}
+    {{ download_count }}{% if download_count %}: <a href="{% url bookstore.views.staff_purchase_detail purchase_id=purchase.id %}">View</a>{% endif %}{% endwith %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</form>
+</div>
+{% pager purchasepager %}
+
+{% endblock content %}

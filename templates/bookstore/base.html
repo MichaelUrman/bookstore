@@ -45,7 +45,13 @@
 {% block content %}
 {% endblock %}
 </div>
-<div id="left">{% block leftbar %}<div id="sidebar" class="ui-corner-all bshadow">{% block sidebar %}{% genre_sidebar %}{% author_sidebar %}{% endblock sidebar %}</div{#sidebar#}>{% endblock leftbar %}</div{#left#}>
+<div id="left">{% block leftbar %}
+<div id="sidebar" class="ui-corner-all bshadow">{% block sidebar %}
+{% genre_sidebar %}
+{% author_sidebar %}
+{% if request.user.is_staff %}{% staff_sidebar %}{% endif %}
+{% endblock sidebar %}</div{#sidebar#}>
+{% endblock leftbar %}</div{#left#}>
 <div id="right"><div id="rightbar" class="ui-corner-all">
 <div class="rightbar ui-corner-all" id="user">
 {% if request.user.is_authenticated %}

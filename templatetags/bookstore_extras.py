@@ -146,10 +146,15 @@ def author_sidebar():
     return t.render(Context({'authors': Person.objects.filter(author=True, visible=True).order_by('-rank')[:6]}))
 
 @register.simple_tag
+def staff_sidebar():
+    t = template.loader.get_template('bookstore/staff_sidebar.html')
+    return t.render(Context())
+
+@register.simple_tag
 def site_headnav():
     t = template.loader.get_template('bookstore/site_headnav.html')
     return t.render(Context({'pages': SitePage.objects.filter(visible=True, showinheader=True).order_by('display_order')}))
-
+    
 @register.simple_tag
 def site_footnav():
     t = template.loader.get_template('bookstore/site_footnav.html')
@@ -171,3 +176,27 @@ class FormatBookCardNode(template.Node):
         book = self.book_reference.resolve(context)
         t = template.loader.get_template('bookstore/book_summary.html')
         return t.render(Context({'book': book}, autoescape=context.autoescape))
+        
+@register.tag
+def sort(parser, token):
+    try:
+        tag_name, request_variable, sort_variable = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, "%r tag requires exactly two arguments" % token.contents.split()[0]
+    return FormatSortLinkNode(request_variable, sort_variable)
+
+class FormatSortLinkNode(template.Node):
+    def __init__(self, request_variable, sort_variable):
+        self.request_reference = template.Variable(request_variable)
+        self.sort_reference = template.Variable(sort_variable)
+    def render(self, context):
+        request = self.request_reference.resolve(context)
+        sort = self.sort_reference.resolve(context)
+        
+        req = request.GET.copy()
+        current_sort = req.get("sort")
+        direction = "+-"[current_sort == ("+" + sort)]
+        req["sort"] = direction + sort
+        char = current_sort == ("-" + sort) and "&#9650;" or current_sort == ("+" + sort) and "&#9660;" or "&#9671;"
+        
+        return "<a title=\"Click to Sort\" href=\"?%s\">%s</a>" % (req.urlencode(), char)

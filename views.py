@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models import Count
 
 from bookstore.models import Genre, Person, Book, BookPublication
 from bookstore.models import Purchase, MergedUser, PaypalIpn, Download
@@ -388,3 +389,76 @@ def paypal_ipn(request):
         raise
     
     return HttpResponse("Ok")
+
+def require_staff(view):
+    def surrogate_view(request, *args, **kwargs):
+        if not request.user.is_staff:
+            return HttpResponseNotFound()
+        return view(request, *args, **kwargs)
+    surrogate_view.__doc__ = view.__doc__
+    return surrogate_view
+
+@require_staff
+def staff_purchase(request):
+    user = request.REQUEST.get('user')
+    if user:
+        purchases = get_merged_purchases(User.get(pk=user))
+    else:
+        purchases = Purchase.objects.all()
+
+    book = request.REQUEST.get('book')
+    if book:
+        purchases = purchases.filter(publication__book=Book.get(pk=book))
+        
+    status = request.REQUEST.get('status') or 'RS'
+    purchases = purchases.filter(status__in=status)
+    
+    sort = request.REQUEST.get('sort')
+    if sort:
+        purchases = purchases.annotate(downloads=Count('download')).order_by(sort.strip("+"))
+        
+    purchasepager = Pager(request, purchases.count(), pagesize=50)
+    purchases = purchases[purchasepager.slice]
+    
+    toggle_pending = request.GET.copy()
+    toggle_pending["status"] = ['RS', 'PRSC'][status == 'RS']
+    toggle_pending = '?' + toggle_pending.urlencode()
+
+    return render_to_response("bookstore/staff_purchases.html", locals())
+    
+@require_staff
+def staff_purchase_detail(request, purchase_id):
+    purchase = Purchase.objects.get(pk=purchase_id)
+    downloads = purchase.download_set.all()
+
+    sort = request.REQUEST.get('sort')
+    if sort:
+        downloads = downloads.order_by(sort.strip("+"))
+        
+    downloadpager = Pager(request, downloads.count(), pagesize=50)
+    downloads = downloads[downloadpager.slice]
+    
+    return render_to_response("bookstore/staff_purchase_detail.html", locals())
+    
+@require_staff
+def staff_review(request):
+    if request.POST.get("op") == "review":
+        email = request.POST.get("email")
+        name = request.POST.get("name")
+        pub_id = request.POST.get("publication")
+        publication = pub_id and BookPublication.objects.get(pk=pub_id)
+        if email and name and publication:
+            raise ValueError("TODO: set up stuff, send email")
+            messages.add_message(request, messages.SUCCESS,
+                "Sent review copy of %s to %s (%s)" % (publication.book.title, name, email))
+            return redirect(staff_review)
+        
+        if not email:
+            messages.add_message(request, messages.ERROR, "Must specify email")
+        if not name:
+            messages.add_message(request, messages.ERROR, "Must specify name")
+        if not publication:
+            messages.add_message(request, messages.ERROR, "Must specify book")
+        
+    books = Book.objects.all()
+    return render_to_response("bookstore/staff_review.html", locals(), context_instance=RequestContext(request))

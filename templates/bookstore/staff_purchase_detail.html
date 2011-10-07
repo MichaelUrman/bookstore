@@ -1,0 +1,31 @@
+{% extends "bookstore/base_admin.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}Purchases - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all" style="overflow: auto">
+<h3>Downloads of <a href="{{ purchase.book.get_absolute_url }}">{{ purchase.book.title }}</a></h3>
+<p>Original {{ purchase.get_transaction_display.lower }} by {{ purchase.customer.email }} for {{ purchase.price }} on {{ purchase.address }} at {{ purchase.date|date:"Y-m-d G:i" }}</p>
+<table class="purchases">
+<tbody>
+<tr>
+    <th>Date&nbsp;{% sort request "timestamp" %}</th>
+    <th>Address&nbsp;{% sort request "ipaddress" %}</th>
+</tr>
+{% for download in downloads %}
+{% ifchanged download.timestamp.date %}
+<tr><th colspan="9" class="date">{{ download.timestamp|date:"l, Y-m-d" }}</th></tr>
+{% endifchanged %}
+<tr>
+    <td>{{ download.timestamp|time:"G:i" }}</td>
+    <td>{{ download.ipaddress }}</a></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% pager downloadpager %}
+
+{% endblock content %}
