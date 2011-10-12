@@ -27,14 +27,15 @@
 {% endifchanged %}
 <tr>
     <td>{{ purchase.date|time:"G:i" }}</td>
-    <td title="{{ purchase.get_transaction_display }}">{{ purchase.transaction }}</td>
+    <td title="{{ purchase.get_transaction_display }}">{{ purchase.transaction }}: <a href="{{ purchase.get_download_url }}" {% if purchase.transaction == 'V' %}onclick="if (!confirm('Visiting costs a reviewer download; visit anyway?')) window.event.preventDefault();"{% endif %}>link</a></td>
     <td><a href="{{ purchase.book.get_absolute_url }}">{{ purchase.book.title }}</a></td>
     <td>{{ purchase.publication.format.name }}</td>
     <td title="{{ purchase.get_status_display }}">{{ purchase.status }}</td>
     <td>{{ purchase.price }}</td>
-    <td>{% if purchase.customer %}Bought by <span title="{{ purchase.email }}">{{ purchase.customer.first_name }}</span> on {{ purchase.address }}
-        {% else %}{% if purchase.admin %}Sent by {{ purchase.admin.first_name }} to {{ purchase.email }} from {{ purchase.address }}{% endif %}
+    <td>{% if purchase.transaction == 'V' %}Sent to <span title="{{ purchase.email }}">{{ purchase.email_name }}</span> by <span title="{{ purchase.admin.email }} on {{ purchase.address }}">{{ purchase.admin.first_name }}</span>
+        {% else %}Bought by <span title="{{ purchase.email }} on {{ purchase.address }}">{{ purchase.customer.first_name }}</span>
         {% endif %}</td>
+        
     <td>{% with purchase.download_set.count as download_count %}
     {{ download_count }}{% if download_count %}: <a href="{% url bookstore.views.staff_purchase_detail purchase_id=purchase.id %}">View</a>{% endif %}{% endwith %}</td>
 </tr>

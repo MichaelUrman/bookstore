@@ -19,13 +19,16 @@
     {% if book.bookpublication_set %}
     <optgroup label="{{ book.title }}{% if not book.is_published %} (upcoming){% endif %}">
         {% for pub in book.bookpublication_set.all %}
-        <option value="{{ pub.id }}">{{book.title}} ({{pub.format.name}})</option>
+        <option value="{{ pub.id }}">{{ book.title }} ({{ pub.format.name }})</option>
         {% endfor %}
     </optgroup>
     {% endif %}
     {% endfor %}
 </select></div>
-<div><label for="message">Message:</label><textarea name="message" id="message" rows="6" cols="60">{% if message %}{{ message }}{% else %}Dear __name__,
+<div>
+<label for="message">Message:</label>
+<div style="float: right; font-size: x-small;"><p><strong>Message Replacements:</strong></p><p>__name__: customer name<br />__title__: book title<br />__link__: download link</p></div>
+<textarea name="message" id="message" rows="6" cols="60">{% if message %}{{ message }}{% else %}Dear __name__,
 
 Here is your review copy of Lillibridge Press's __title__ for your consideration. The link to this file will be active for 24 hours, granting you access to three downloads.
 
@@ -42,7 +45,5 @@ Lillibridge Press{% endif %}</textarea></div>
 
 {% block onready %}{{block.super}}
 $("button").button();
-$("#wiki").html("<p><strong>Message Replacements</strong></p><p>__name__: customer name<br />__title__: book title<br />__link__: download link</p>");
-$("select[name='publication']").val("{{publication}}");
-$(".tabs").tabs({collapsible: true}).tabs('select', 0);
+$("select[name='publication']").val("{{ pub_id }}");
 {% endblock %}

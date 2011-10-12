@@ -7,6 +7,7 @@ from decimal import Decimal, ROUND_UP
 
 import cgi
 from datetime import datetime, date
+import sha
 import logging
 
 # HACK: make it possible to identify openiduser records in the admin interface.
@@ -362,6 +363,7 @@ class Purchase(models.Model):
         ('S', 'Submitted'),
         ('R', 'Ready'),
         ('C', 'Cancelled'),
+        ('X', 'Expired'),
     ))
     admin = models.ForeignKey(User, null=True, related_name="purchase_admin_set")
     customer = models.ForeignKey(User, related_name="purchase_customer_set")
@@ -394,7 +396,10 @@ class Purchase(models.Model):
         
     @models.permalink
     def get_download_url(self):
-        return ('bookstore.views.download_book', (), dict(pub_id=self.publication.id))
+        if self.transaction == 'V':
+            return ('bookstore.views.download_review', (), dict(purchase_id=self.id, key=sha.new(self.email_address + str(self.id)).hexdigest()))
+        else:
+            return ('bookstore.views.download_book', (), dict(pub_id=self.publication.id))
 
 class PaypalIpn(models.Model):
     purchase = models.ForeignKey(Purchase)

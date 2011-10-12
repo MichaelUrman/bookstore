@@ -20,6 +20,7 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 import logging
 from random import choice
+import sha
 import urllib2
 
 # HG mail: http://lillibridgepress.com:2096
@@ -275,14 +276,39 @@ def download_book(request, pub_id):
     if lastweek.count() >= 5 or lastmonth.count() >= 8:
         book = pub.book
         return render_to_response("bookstore/download_limit.html", locals())
+
+    return _serve_purchase(request, purchase)
     
+def _serve_purchase(request, purchase):
     # return the content of the download - serve the file
     from os import path
-    response = HttpResponse(FileWrapper(open(pub.data.path, "rb")), content_type=pub.format.mime)
-    response["Content-Length"] = path.getsize(pub.data.path)
-    response['Content-Disposition'] = 'attachment; filename=%s [%s].%s' % (pub.book.title, pub.book.publish_date.year, pub.format.extension)
+    pub = purchase.publication
+    book = pub.book
+    data = pub.data
+    format = pub.format
+    response = HttpResponse(FileWrapper(open(data.path, "rb")), content_type=format.mime)
+    response["Content-Length"] = path.getsize(data.path)
+    response['Content-Disposition'] = 'attachment; filename=%s [%s].%s' % (book.title, book.publish_date.year, format.extension)
     Download.objects.create(purchase=purchase, ipaddress=request.META.get("REMOTE_ADDR"))
     return response
+    
+def download_review(request, purchase_id, key):
+    purchase = get_object_or_404(Purchase, pk=purchase_id)
+    if purchase.transaction != 'V' or purchase.status != 'R' or key != sha.new(purchase.email_address + str(purchase.id)).hexdigest():
+        return HttpResponseNotFound()
+    
+    # there's a ready review; check for date or count violations
+    downloads = purchase.download_set
+    now = datetime.now()
+    downloaded = downloads.count()
+    if purchase.date + timedelta(days=3) < now \
+        or downloaded >= 3 or (downloaded >= 1 and
+        downloads.order_by('timestamp')[0].timestamp + timedelta(days=1) < now):
+        purchase.status = 'X'
+        purchase.save()
+        return HttpResponseNotFound()
+    
+    return _serve_purchase(request, purchase)
 
 @login_required
 def purchase_listing(request):
@@ -410,7 +436,7 @@ def staff_purchase(request):
     if book:
         purchases = purchases.filter(publication__book=Book.get(pk=book))
         
-    status = request.REQUEST.get('status') or 'RS'
+    status = request.REQUEST.get('status') or 'RSX'
     purchases = purchases.filter(status__in=status)
     
     sort = request.REQUEST.get('sort')
@@ -421,7 +447,7 @@ def staff_purchase(request):
     purchases = purchases[purchasepager.slice]
     
     toggle_pending = request.GET.copy()
-    toggle_pending["status"] = ['RS', 'PRSC'][status == 'RS']
+    toggle_pending["status"] = ['RSX', 'PRSCX'][status == 'RSX']
     toggle_pending = '?' + toggle_pending.urlencode()
 
     return render_to_response("bookstore/staff_purchases.html", locals())
@@ -448,17 +474,33 @@ def staff_review(request):
         pub_id = request.POST.get("publication")
         publication = pub_id and BookPublication.objects.get(pk=pub_id)
         if email and name and publication:
-            raise ValueError("TODO: set up stuff, send email")
+            book = publication.book
+            bookprice = book.price_set.get(currency='USD')
+            purchase = Purchase.objects.create(transaction='V',
+                                price=bookprice.price,
+                                currency=bookprice.currency,
+                                publication=publication,
+                                status='P',
+                                admin=request.user,
+                                customer=request.user,
+                                email=email,
+                                email_name=name,
+                                email_address=email,
+                                address=request.META['REMOTE_ADDR'],
+                                email_sent=False)
+            purchase.status = 'R'
+            purchase.email_link = request.build_absolute_uri(purchase.get_download_url())
+            purchase.save()
             messages.add_message(request, messages.SUCCESS,
-                "Sent review copy of %s to %s (%s)" % (publication.book.title, name, email))
+                "Sent review copy of %s (%s) to %s (%s)" % (publication.book.title, publication.format.name, name, email))
             return redirect(staff_review)
         
         if not email:
-            messages.add_message(request, messages.ERROR, "Must specify email")
+            messages.add_message(request, messages.ERROR, "Must specify Email")
         if not name:
-            messages.add_message(request, messages.ERROR, "Must specify name")
+            messages.add_message(request, messages.ERROR, "Must specify Name")
         if not publication:
-            messages.add_message(request, messages.ERROR, "Must specify book")
+            messages.add_message(request, messages.ERROR, "Must specify Book")
         
     books = Book.objects.all()
     return render_to_response("bookstore/staff_review.html", locals(), context_instance=RequestContext(request))
