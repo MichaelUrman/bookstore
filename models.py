@@ -437,10 +437,12 @@ def send_purchase_email(sender, **kwargs):
         message.to = purchase.email_address
         if purchase.email_name:
             message.to = ['"%s" <%s>' % (purchase.email_name, purchase.email_address)]
+        template = "bookstore/email_purchased.txt"
         message.subject = "Your Lillibridge Press eBook Purchase"
         message.from_email = "Lillibridge Press Sales <sales@lillibridgepress.com>"
-        kind = purchase.transaction == "V" and "review" or "purchased"
-        template = "bookstore/email_%s.txt" % kind
+        if purchase.transaction == "V":
+            template = "bookstore/email_review.txt"
+            message.subject = "Your Lillibridge Press eBook Review Copy"
         message.body = render_to_string(template, 
             dict(purchase=purchase, book=purchase.publication.book))
         
