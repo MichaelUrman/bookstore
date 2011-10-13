@@ -200,3 +200,26 @@ class FormatSortLinkNode(template.Node):
         char = current_sort == ("-" + sort) and "&#9650;" or current_sort == ("+" + sort) and "&#9660;" or "&#9671;"
         
         return "<a title=\"Click to Sort\" href=\"?%s\">%s</a>" % (req.urlencode(), char)
+
+from django.utils.safestring import mark_safe
+@register.tag
+def preview(parser, token):
+    try:
+        # split_contents() knows not to split quoted strings.
+        tag_name, template_variable = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, "%r tag requires exactly one arguments" % token.contents.split()[0]
+    return PreviewTemplateNode(template_variable)
+    
+class PreviewTemplateNode(template.Node):
+    def __init__(self, template_variable):
+        self.template_reference = template.Variable(template_variable)
+    def render(self, context):
+        template_name = self.template_reference.resolve(context)
+        t = template.loader.get_template(template_name)
+        pm = PreviewMapper()
+        return t.render(Context(dict(purchase=pm, book=pm), autoescape=context.autoescape)).replace("\n", "<br/>")
+
+class PreviewMapper(object):
+    def __getattr__(self, item):
+        return mark_safe("""<span id="preview-%s">%s</span>""" % (item, item))

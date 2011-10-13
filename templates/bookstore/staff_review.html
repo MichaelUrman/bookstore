@@ -25,19 +25,9 @@
     {% endif %}
     {% endfor %}
 </select></div>
-<div>
-<label for="message">Message:</label>
-<div style="float: right; font-size: x-small;"><p><strong>Message Replacements:</strong></p><p>__name__: customer name<br />__title__: book title<br />__link__: download link</p></div>
-<textarea name="message" id="message" rows="6" cols="60">{% if message %}{{ message }}{% else %}Dear __name__,
-
-Here is your review copy of Lillibridge Press's __title__ for your consideration. The link to this file will be active for 24 hours, granting you access to three downloads.
-
-Your eBook can be downloaded at:
-
-__link__
-
-Thank You,
-Lillibridge Press{% endif %}</textarea></div>
+<div><label for="preview">Preview:</label>
+<div id="preview" style="padding: 0.5em; border: 1px inset black">{% preview "bookstore/email_review.txt" %}</div>
+</div>
 <button id="review" style="float:right" type="submit" name="op" value="review">Send Free Copy</button>
 </form>
 </div>
@@ -45,5 +35,9 @@ Lillibridge Press{% endif %}</textarea></div>
 
 {% block onready %}{{block.super}}
 $("button").button();
-$("select[name='publication']").val("{{ pub_id }}");
+$("#publication").val("{{ pub_id }}");
+$("#email").change(function() { $("#preview-email_address").text($(this).val() || "[email address]"); }).change();
+$("#publication").change(function() { $("#preview-title").text($(this).find("option:selected").text() || "[book title]"); }).change();
+$("#name").change(function() { $("#preview-email_name").text($(this).val() || "[name]"); }).change();
+$("#preview-email_link").text("[download link]");
 {% endblock %}

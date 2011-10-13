@@ -1,0 +1,10 @@
+Dear {{ purchase.email_name }},
+
+Here is your review copy of Lillibridge Press's {{ book.title }} for your consideration. The link to this file will be active for one week, granting you access to three downloads in a one day period.
+
+Your eBook can be downloaded at:
+
+{{ purchase.email_link }}
+
+Thank You,
+Lillibridge Press
