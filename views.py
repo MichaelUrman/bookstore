@@ -75,6 +75,7 @@ def sitemap(request):
     authors = Person.objects.filter(visible=True, author=True).order_by("lastname", "firstname")
     genres = Genre.objects.filter(visible=True).order_by("name")
     site_pages = SitePage.objects.filter(visible=True).order_by("display_order")
+    root = request.build_absolute_uri("/").rstrip("/")
     return render_to_response("bookstore/sitemap.xml", locals())
     
 def site_page(request, page_link, migrate_url=False):

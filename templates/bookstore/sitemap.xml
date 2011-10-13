@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>{% url bookstore.views.storefront %}</loc>
+    <loc>{{ root }}{% url bookstore.views.storefront %}</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{{ root }}{% url bookstore.views.coming_soon %}</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
   </url>{% for page in site_pages %}
   <url>
-    <loc>{{ page.get_absolute_url }}</loc>
+    <loc>{{ root }}{{ page.get_absolute_url }}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>{% endfor %}{% for book in published_books %}
   <url>
-    <loc>{{ book.get_absolute_url }}</loc>
+    <loc>{{ root }}{{ book.get_absolute_url }}</loc>
     <lastmod>{{ book.publish_date|date:"Y-m-d" }}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>{% endfor %}{% for book in upcoming_books %}
   <url>
-    <loc>{{ book.get_absolute_url }}</loc>
+    <loc>{{ root }}{{ book.get_absolute_url }}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>{% endfor %}{% for author in authors %}
   <url>
-    <loc>{{ author.get_absolute_url }}</loc>
+    <loc>{{ root }}{{ author.get_absolute_url }}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>{% endfor %}{% for genre in genres %}
   <url>
-    <loc>{{ genre.get_absolute_url }}</loc>
+    <loc>{{ root }}{{ genre.get_absolute_url }}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>{% endfor %}
