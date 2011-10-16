@@ -137,7 +137,7 @@ class Book(models.Model):
     @property
     def price(self, quantum=Decimal('.01')):
         for price in self.price_set.filter(currency='USD'):
-            return "%s%s" % (price.symbol, price.price.quantize(quantum, rounding=ROUND_UP))
+            return "%s%s" % (price.symbol, price.quantized)
         return 'ERROR'
 
     @property
@@ -157,6 +157,10 @@ class BookPrice(models.Model):
     @property
     def symbol(self, symbols=CURRENCY_SYMBOLS):
         return symbols[self.currency]
+    
+    @property
+    def quantized(self, _quantum=Decimal("0.01")):
+        return self.price.quantize(_quantum, ROUND_UP)
 
     class Meta:
         unique_together = ("book", "currency")

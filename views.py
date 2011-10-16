@@ -490,7 +490,7 @@ def staff_review(request):
             book = publication.book
             bookprice = book.price_set.get(currency='USD')
             purchase = Purchase.objects.create(transaction='V',
-                                price=bookprice.price,
+                                price=bookprice.quantized,
                                 currency=bookprice.currency,
                                 publication=publication,
                                 status='P',
