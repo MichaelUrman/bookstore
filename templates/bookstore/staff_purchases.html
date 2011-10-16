@@ -37,7 +37,7 @@
         {% endif %}</td>
         
     <td>{% with purchase.download_set.count as download_count %}
-    {{ download_count }}{% if download_count %}: <a href="{% url bookstore.views.staff_purchase_detail purchase_id=purchase.id %}">View</a>{% endif %}{% endwith %}</td>
+    {{ download_count }}: {% if download_count %}<a href="{% url bookstore.views.staff_purchase_detail purchase_id=purchase.id %}">View</a>{% else %}{% if purchase.status != 'R' %}<a href="{% url bookstore.views.purchase_detail purchase_id=purchase.id %}">Edit</a>{% endif %}{% endif %}{% endwith %}</td>
 </tr>
 {% endfor %}
 </tbody>

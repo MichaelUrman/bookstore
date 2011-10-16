@@ -246,6 +246,10 @@ def purchase_book(request, pub_id):
     purchases = get_merged_purchases(request.user, publication=pub)
     try: purchased = purchases.filter(status='R').latest('date')
     except Purchase.DoesNotExist: pass
+
+    if purchased:
+        return redirect(purchased.get_download_url())
+
     try: submitted = purchases.filter(status='S').latest('date')
     except Purchase.DoesNotExist: pass
     del purchases
@@ -271,9 +275,8 @@ def purchase_book(request, pub_id):
                         email=request.user.email,
                         address=request.META['REMOTE_ADDR'],
                         email_sent=free_purchase)
-    if free_purchase:
-        return redirect(purchase.get_download_url())
-    return render_to_response("bookstore/purchase_book.html", locals())
+    paypal_action = PAYPAL
+    return render_to_response("bookstore/purchase_book.html", locals(), context_instance=RequestContext(request))
 
 @login_required
 def download_book(request, pub_id):

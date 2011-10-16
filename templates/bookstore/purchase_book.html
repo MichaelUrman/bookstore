@@ -6,32 +6,20 @@
 
 {% block content %}
 
-{% if purchased %}
+{% if submitted %}
 <div class="entry ui-corner-all">
 <h3>You have already purchased <em>{{ book.title }}</em></h3>
-<p>Click the button below to download <em>{{ book.title }}</em> ({{ pub.format.name }}). If you wish to purchase it again, see the next section.</p>
-<form class="center" method="POST" action="{{ purchased.get_download_url }}">
-{% csrf_token %}
-<button>
-<img src="{{ pub.format.image.url }}" title="{{ pub.format.name }}" style="float:left;"/>&nbsp;<strong>{{ book.title }}</strong><br/><br/>Download&nbsp;Now
-</button>
-</form>
+<p>You have already initiated a payment through PayPal to purchase <em>{{ book.title }}</em> ({{ pub.format.name }}). However that payment is still pending. <a href="{{ submitted.get_absolute_url }}">Why is my payment pending</a>?</p>
+<p>Note that submitting another purchase below may result in another charge to your account.</p>
 </div>
-{% else %}
-    {% if submitted %}
-    <div class="entry ui-corner-all">
-    <h3>You have already purchased <em>{{ book.title }}</em></h3>
-    <p>You have already initiated a payment through PayPal to purchase <em>{{ book.title }}</em> ({{ pub.format.name }}). However that payment is still pending. <a href="{{ submitted.get_absolute_url }}">View details</a>.</p>
-    <p>Note that submitting another purchase below will most likely result in another charge to your account.</p>
-    </div>
-    {% endif %}
 {% endif %}
 
 <div class="entry ui-corner-all" id="purchase">
+<a href="{{ booklink }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" /></a><br/>
 <h3>Purchasing <em>{{ book.title }}</em></h3>
 <p>Click the button below to complete this transaction on PayPal. Once your payment has been processed, you will receive an email with instructions for downloading <em>{{ book.title }}</em> ({{ pub.format.name }}). This email will be sent to the address registered to your PayPal account.</p>
 
-<form action="{{ PAYPAL }}" method="post" class="center">
+<form action="{{ paypal_action }}" method="post" class="center">
 {% csrf_token %}
 {# https://www.paypal.com/cgi-bin/webscr?cmd=p/pdn/howto_checkout-outside - from search on webscr _xclick #}
 <input type="hidden" name="cmd" value="_xclick" />
