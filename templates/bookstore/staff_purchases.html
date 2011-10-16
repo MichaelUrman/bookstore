@@ -27,7 +27,7 @@
 {% endifchanged %}
 <tr>
     <td>{{ purchase.date|time:"G:i" }}</td>
-    <td title="{{ purchase.get_transaction_display }}">{{ purchase.transaction }}: <a href="{{ purchase.get_download_url }}" {% if purchase.transaction == 'V' %}onclick="if (!confirm('Visiting costs a reviewer download; visit anyway?')) window.event.preventDefault();"{% endif %}>link</a></td>
+    <td title="{{ purchase.get_transaction_display }}">{{ purchase.transaction }}: <a href="{{ purchase.get_download_url }}" {% if purchase.transaction == 'V' %}onclick="warn('Downloading costs the reviewer a download');"{% endif %}>link</a></td>
     <td><a href="{{ purchase.book.get_absolute_url }}">{{ purchase.book.title }}</a></td>
     <td>{{ purchase.publication.format.name }}</td>
     <td title="{{ purchase.get_status_display }}">{{ purchase.status }}</td>

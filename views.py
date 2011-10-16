@@ -19,7 +19,6 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 import logging
 from random import choice
-import sha
 import urllib2
 
 # HG mail: http://lillibridgepress.com:2096
@@ -263,10 +262,10 @@ def purchase_book(request, pub_id):
     return render_to_response("bookstore/purchase_book.html", locals())
 
 @login_required
-@condition(etag_func=lambda request, pub_id: get_object_or_404(BookPublication, pk=pub_id).get_etag())
 def download_book(request, pub_id):
     pub = get_object_or_404(BookPublication, pk=pub_id)
     purchases = get_merged_purchases(request.user, publication=pub)
+    book = pub.book
     
     # see if there's a ready purchase under this user's merged account
     try:
@@ -281,36 +280,32 @@ def download_book(request, pub_id):
             return render_to_response("bookstore/download_unpurchased.html", locals())
         else:
             return redirect(unready, permanent=False)
-
-    # since there's a ready purchase, check for abusive download patterns
-    now = datetime.now()
-    downloads = purchase.download_set
-    lastweek = downloads.filter(timestamp__gte=now - timedelta(days=7))
-    lastmonth = downloads.filter(timestamp__gte=now - timedelta(days=30))
-    if lastweek.count() >= 5 or lastmonth.count() >= 8:
-        book = pub.book
-        return render_to_response("bookstore/download_limit.html", locals())
-
-    return _serve_purchase(request, purchase)
     
-@condition(etag_func=lambda req, purchase_id, key: get_object_or_404(Purchase, pk=purchase_id).publication.get_etag())
+    if purchase.is_available_to(request.user):
+        return render_to_response("bookstore/download_ready.html", locals())
+    return render_to_response("bookstore/download_limit.html", locals())
+    
 def download_review(request, purchase_id, key):
     purchase = get_object_or_404(Purchase, pk=purchase_id)
-    if purchase.transaction != 'V' or purchase.status != 'R' or key != sha.new(purchase.email_address + str(purchase.id)).hexdigest():
+    pub = purchase.publication
+    book = pub.book
+    if purchase.transaction != 'V' or key != purchase.get_key():
         return HttpResponseNotFound()
+
+    if purchase.is_available_to(request.user):
+        return render_to_response("bookstore/download_ready.html", locals())
+    return render_to_response("bookstore/download_limit.html", locals())
     
-    # there's a ready review; check for date or count violations
-    downloads = purchase.download_set
-    now = datetime.now()
-    downloaded = downloads.count()
-    if purchase.date + timedelta(days=3) < now \
-        or downloaded >= 3 or (downloaded >= 1 and
-        downloads.order_by('timestamp')[0].timestamp + timedelta(days=1) < now):
-        purchase.status = 'X'
-        purchase.save()
-        return HttpResponseNotFound()
-    
-    return _serve_purchase(request, purchase)
+
+@require_POST
+@csrf_exempt
+@condition(etag_func=lambda req: get_object_or_404(BookPublication, pk=req.POST.get('pub')).get_etag())
+def download_pub(request):
+    purchase = get_object_or_404(Purchase, pk=request.POST.get('id'))
+    if request.POST.get('key') == purchase.get_key() and purchase.status == 'R' \
+        and purchase.is_available_to(request.user):
+        return _serve_purchase(request, purchase)
+    return HttpResponseForbidden()
 
 @login_required
 def purchase_listing(request):

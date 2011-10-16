@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from decimal import Decimal, ROUND_UP
 
 import cgi
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from os import path
 import sha
 import logging
@@ -394,14 +394,43 @@ class Purchase(models.Model):
     def __unicode__(self):
         return '%s %s of %s at %s' % (self.get_status_display(), self.get_transaction_display(), self.publication, self.date)
 
+    def is_available_to(self, user):
+        if self.status != 'R':
+            return False
+        if self.transaction in 'PFR':
+            # since there's a ready purchase, check for abusive download patterns
+            now = datetime.now()
+            downloads = self.download_set
+            lastweek = downloads.filter(timestamp__gte=now - timedelta(days=7))
+            lastmonth = downloads.filter(timestamp__gte=now - timedelta(days=30))
+            if lastweek.count() >= 5 or lastmonth.count() >= 8:
+                return False
+            return True
+        if self.transaction in 'V':
+            # there's a ready review; check for date or count violations
+            downloads = self.download_set
+            now = datetime.now()
+            downloaded = downloads.count()
+            if self.date + timedelta(days=3) < now \
+                or downloaded >= 3 or (downloaded >= 1 and
+                downloads.order_by('timestamp')[0].timestamp + timedelta(days=1) < now):
+                self.status = 'X'
+                self.save()
+                return False
+            return True
+        return False
+
+    def get_key(self):
+        return sha.new(self.email_address + str(self.id)).hexdigest()
+
     @models.permalink
     def get_absolute_url(self):
         return ('bookstore.views.purchase_detail', (), dict(purchase_id=self.id))
-        
+
     @models.permalink
     def get_download_url(self):
         if self.transaction == 'V':
-            return ('bookstore.views.download_review', (), dict(purchase_id=self.id, key=sha.new(self.email_address + str(self.id)).hexdigest()))
+            return ('bookstore.views.download_review', (), dict(purchase_id=self.id, key=self.get_key()))
         else:
             return ('bookstore.views.download_book', (), dict(pub_id=self.publication.id))
 

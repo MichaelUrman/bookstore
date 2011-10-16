@@ -1,0 +1,34 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}{{ book.title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+{% with book.get_absolute_url as booklink %}
+<div class="entry ui-corner-all" id="purchase">
+<a href="{{ booklink }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" /></a><br/>
+<h3>Ready to download <em>{{ book.title }}</em></h3>
+<p>Click the button below to download <strong><a href="{{ booklink }}">{{ book.title }}</a></strong>.</p>
+<p>If you are unable to download your book, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Download Error (id={{ purchase.id }})">support@lillibridgepress.com</a>.</p>
+
+<form method="POST" action="{% url bookstore.views.download_pub %}">
+    {% csrf_token %}
+    <input type="hidden" name="pub" value="{{ pub.id }}"></input>
+    <input type="hidden" name="id" value="{{ purchase.id }}"></input>
+    <input type="hidden" name="key" value="{{ purchase.get_key }}"></input>
+    <button>
+        <img src="{{ pub.format.image.url }}" title="{{ pub.format.name }}" style="float:left;"
+        />&nbsp;<strong>{{ book.title }}</strong><br/>Download&nbsp;Now:&nbsp;{{ pub.data.size|filesizeformat }}
+    </button>
+</form>
+
+{% if request.user.is_staff %}
+<div class="admin" style="clear: left"><ul>
+{% for download in purchase.download_set.all %}
+<li>{{ download.timestamp }}: {{ download.ipaddress }}</li>
+{% endfor %}
+</ul></div>
+{% endif %}
+</div>
+
+{% endwith %}
+{% endblock content %}
