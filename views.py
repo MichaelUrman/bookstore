@@ -266,7 +266,7 @@ def purchase_book(request, pub_id):
         status = 'R'
     bookprice = book.price_set.get(currency='USD')
     purchase = Purchase.objects.create(transaction=transaction,
-                        price=bookprice.price,
+                        price=bookprice.quantized,
                         currency=bookprice.currency,
                         publication=pub,
                         status=status,
