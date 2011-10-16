@@ -1,6 +1,5 @@
 # bookstore views
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
-from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.utils.html import escape, linebreaks
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -9,7 +8,7 @@ from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import condition, require_POST
 from django.db.models import Count
 
 from bookstore.models import Genre, Person, Book, BookPublication
@@ -56,6 +55,19 @@ class Pager:
 
         self.next = (page * size + size < count) and ("?p=%s" % (page + 1) + sizer) or ""
         self.prev = (page > 0) and ("?p=%s" % (page - 1) + sizer) or ""
+
+def _serve_purchase(request, purchase):
+    # return the content of the download - serve the file
+    from os import path
+    pub = purchase.publication
+    book = pub.book
+    data = pub.data
+    format = pub.format
+    response = HttpResponse(data, content_type=format.mime)
+    response["Content-Length"] = data.size
+    response['Content-Disposition'] = 'attachment; filename=%s [%s].%s' % (book.title, book.publish_date.year, format.extension)
+    Download.objects.create(purchase=purchase, ipaddress=request.META.get("REMOTE_ADDR"))
+    return response
 
 def storefront(request):
     cards = StorefrontNewsCard.objects.filter(visible=True).order_by("display_order")
@@ -251,6 +263,7 @@ def purchase_book(request, pub_id):
     return render_to_response("bookstore/purchase_book.html", locals())
 
 @login_required
+@condition(etag_func=lambda request, pub_id: get_object_or_404(BookPublication, pk=pub_id).get_etag())
 def download_book(request, pub_id):
     pub = get_object_or_404(BookPublication, pk=pub_id)
     purchases = get_merged_purchases(request.user, publication=pub)
@@ -280,19 +293,7 @@ def download_book(request, pub_id):
 
     return _serve_purchase(request, purchase)
     
-def _serve_purchase(request, purchase):
-    # return the content of the download - serve the file
-    from os import path
-    pub = purchase.publication
-    book = pub.book
-    data = pub.data
-    format = pub.format
-    response = HttpResponse(FileWrapper(open(data.path, "rb")), content_type=format.mime)
-    response["Content-Length"] = path.getsize(data.path)
-    response['Content-Disposition'] = 'attachment; filename=%s [%s].%s' % (book.title, book.publish_date.year, format.extension)
-    Download.objects.create(purchase=purchase, ipaddress=request.META.get("REMOTE_ADDR"))
-    return response
-    
+@condition(etag_func=lambda req, purchase_id, key: get_object_or_404(Purchase, pk=purchase_id).publication.get_etag())
 def download_review(request, purchase_id, key):
     purchase = get_object_or_404(Purchase, pk=purchase_id)
     if purchase.transaction != 'V' or purchase.status != 'R' or key != sha.new(purchase.email_address + str(purchase.id)).hexdigest():

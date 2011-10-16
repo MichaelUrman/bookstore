@@ -7,6 +7,7 @@ from decimal import Decimal, ROUND_UP
 
 import cgi
 from datetime import datetime, date
+from os import path
 import sha
 import logging
 
@@ -247,6 +248,9 @@ class BookPublication(models.Model):
 
     def __unicode__(self):
         return "%s in %s" % (self.book.title, self.format.name)
+        
+    def get_etag(self):
+        return sha.new(str(self.book.title) + str(path.getmtime(self.data.path))).hexdigest()
 
 class BookReseller(models.Model):
     name = models.CharField(max_length=200, unique=True)
