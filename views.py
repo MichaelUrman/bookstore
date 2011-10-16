@@ -246,8 +246,7 @@ def purchase_book(request, pub_id):
     purchases = get_merged_purchases(request.user, publication=pub)
     try: purchased = purchases.filter(status='R').latest('date')
     except Purchase.DoesNotExist: pass
-
-    if purchased:
+    else:
         return redirect(purchased.get_download_url())
 
     try: submitted = purchases.filter(status='S').latest('date')
