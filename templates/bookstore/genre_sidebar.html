@@ -3,4 +3,5 @@
   {% for genre in genres %}
     <a class="genre" href="{{ genre.get_absolute_url }}" title="{{ genre.blurb|escape }}">{{ genre.name }}</a>
   {% endfor %}
+  <a class="genre more" href="{% url bookstore.views.coming_soon %}" title="Browse our upcoming releases">Upcoming...</a>
 </div>
