@@ -1,0 +1,18 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}Forbidden Page - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all" id="missing">
+<h3>Sorry, this is off limits.</h3>
+<p>We're not sure what you were looking for. Try finding a book by looking through our genres or <a href="{% url bookstore.views.author_list %}">authors</a> listed on the left. Or perhaps check the links near the top or bottom of this page.</p>
+<p>If you were trying to purchase an eBook, have submitted your payment, and do not get an email notification soon, please <a href="{% url bookstore.views.site_page "contact" %}">contact us</a> for assistance.
+<script type="text/javascript">
+  var GOOG_FIXURL_LANG = 'en';
+  var GOOG_FIXURL_SITE = '{{ siteurl }}'
+</script>
+<script type="text/javascript"
+  src="http://linkhelp.clients.google.com/tbproxy/lh/wm/fixurl.js">
+</script>
+</div>
+{% endblock content %}

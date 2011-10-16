@@ -32,3 +32,11 @@ urlpatterns = patterns('bookstore.views',
     (r'^(?P<migrate_url>page/)(?P<page_link>[\w-]+)$', 'site_page'),
     (r'^(?P<page_link>[\w-]+)$', 'site_page'),
 )
+
+from settings import DEBUG
+if DEBUG:
+    urlpatterns += patterns('bookstore.views',
+        (r'^403/$', 'page_access_denied'),
+        (r'^404/$', 'page_not_found'),
+        (r'^500/$', 'page_server_error'),
+    )

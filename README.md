@@ -11,10 +11,16 @@ Setup
 
         'bookstore',
     
-* Add a url mapping to your project's `urls.py` file (an empty prefix will work, but put it last):
+* Add a url mapping to your project's `urls.py` file (an empty prefix instead of `bookstore/` will work, but put it last):
 
         (r'^bookstore/$', include('bookstore.urls')),
         
+* If you don't have them already, consider adding error handlers to your project's `urls.py` file as well:
+
+        handler403 = 'bookstore.views.page_access_denied'
+        handler404 = 'bookstore.views.page_not_found'
+        handler500 = 'bookstore.views.page_server_error'
+
 * Make sure you have a `MEDIA_ROOT` and `MEDIA_URL` set up in your `settings.py`:
 
         MEDIA_ROOT = '/home/www/mydjango-project/media/'

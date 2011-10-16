@@ -8,7 +8,7 @@
 <a href="{{ booklink }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" /></a><br/>
 <h3>Ready to download <em>{{ book.title }}</em></h3>
 <p>Click the button below to download <strong><a href="{{ booklink }}">{{ book.title }}</a></strong>.</p>
-<p>If you are unable to download your book, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Download Error (id={{ purchase.id }})">support@lillibridgepress.com</a>.</p>
+<p>If you are unable to download your book, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Download Error (ready={{ purchase.id }})">support@lillibridgepress.com</a>.</p>
 
 <form method="POST" action="{% url bookstore.views.download_pub %}">
     {% csrf_token %}

@@ -9,10 +9,10 @@
 <h3>Error downloading <em>{{ book.title }}</em></h3>
 {% if purchase.transaction == 'V' %}
 <p>This download of <strong><a href="{{ booklink }}">{{ book.title }}</a></strong> has expired.</p>
-<p>If you were unable to download this eBook for review, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Review Error (id={{ purchase.id }})">support@lillibridgepress.com</a>.</p>
+<p>If you were unable to download this eBook for review, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Review Error (limit={{ purchase.id }})">support@lillibridgepress.com</a>.</p>
 {% else %}
 <p>You have downloaded <strong><a href="{{ booklink }}">{{ book.title }}</a></strong> too many times recently. Please wait a while and try downloading again.</p>
-<p>If you have been unable to download your eBook, or believe you have received this message in error, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Download Error (id={{ purchase.id }})">support@lillibridgepress.com</a>.</p>
+<p>If you have been unable to download your eBook, or believe you have received this message in error, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Download Error (limit={{ purchase.id }})">support@lillibridgepress.com</a>.</p>
 {% endif %}
 
 {% if request.user.is_staff %}

@@ -11,7 +11,7 @@
 <form method="get" action="{{ pub.get_purchase_url }}">
 <p class="center"><button><image src="{{ pub.format.image.url }}" width="{{ pub.format.width }}" height="{{ pub.format.height }}" style="float: left"/> <strong>{{ book.title }}</strong><br />{{ pub.format.name }}</button></p>
 </form>
-<p>If you believe you have received this message in error, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Missing Purchase (id={{pub.id}})">support@lillibridgepress.com</a>.</p>
+<p>If you believe you have received this message in error, please contact us at <a href="mailto:support@lillibridgepress.com?subject=Download Error (lost={{pub.id}})">support@lillibridgepress.com</a>.</p>
 
 {% if request.user.is_staff %}
 <div class="admin" style="clear: left"><ul>

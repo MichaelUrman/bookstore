@@ -68,6 +68,20 @@ def _serve_purchase(request, purchase):
     Download.objects.create(purchase=purchase, ipaddress=request.META.get("REMOTE_ADDR"))
     return response
 
+def page_access_denied(request):
+    return render_to_response("bookstore/page_access_denied.html", locals())
+
+def page_not_found(request):
+    siteurl = request.build_absolute_uri("/").rstrip("/")
+    return render_to_response("bookstore/page_not_found.html", locals())
+
+def page_server_error(request):
+    import settings
+    webmaster = getattr(settings, 'WEBMASTER_EMAIL', '')
+    if not webmaster:
+        webmaster = "webmaster@" + request.get_host()
+    return render_to_response("bookstore/page_server_error.html", locals())
+
 def storefront(request):
     cards = StorefrontNewsCard.objects.filter(visible=True).order_by("display_order")
     all_ads = StorefrontAd.objects.filter(visible=True).order_by("display_order")

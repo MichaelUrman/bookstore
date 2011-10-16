@@ -1,0 +1,16 @@
+{% extends "bookstore/base.html" %}
+
+{% block title %}Whoops! - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all" id="missing">
+<h3>Something's Wrong</h3>
+<p>Something went wrong with the Lillibridge Press web site. We'll look into it as soon as we can.</p>
+<p>If you want to try to help, please <a href="mailto:{{ webmaster }}?subject=Server 500 (url={{ request.path }})">email us</a> with a description of what you were doing. Include the following information as well:</p>
+<textarea rows="10" cols="80" readonly="true">C={{ request.COOKIES }};
+E="{{ request.encoding }}";
+G="{{ request.get_full_path }}";
+M="{{ request.method }}";
+P="{{ request.raw_post_data }}";</textarea>
+</div>
+{% endblock content %}
