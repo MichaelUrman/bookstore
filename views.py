@@ -23,8 +23,8 @@ import urllib2
 
 # HG mail: http://lillibridgepress.com:2096
 
-PAYPAL = "https://www.sandbox.paypal.com/cgi-bin/webscr" # sandbox
-# PAYPAL = "https://www.paypal.com/cgi-bin/webscr" # real
+# PAYPAL = "https://www.sandbox.paypal.com/cgi-bin/webscr" # sandbox
+PAYPAL = "https://www.paypal.com/cgi-bin/webscr" # real
 
 def get_migrated_object_or_404(model, migrate_values, **kwargs):
     """equivalent to get_object_or_404 with fallback checks per migrate_values mapping dict"""
