@@ -1,0 +1,37 @@
+{% extends "bookstore/base_admin.html" %}
+
+{% load bookstore_extras %}
+
+{% block title %}All Books - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="entry ui-corner-all" style="overflow: auto">
+<h3>All Books</h3>
+<form method="post">
+<input type="hidden" name="op" value="give" />
+<table class="purchases">
+<tbody>
+<tr>
+    <th>Title&nbsp;{% sort request "title" %}</th>
+    <th>Added&nbsp;{% sort request "added_date" %}</th>
+    <th>Published&nbsp;{% sort request "publish_date" %}</th>
+    {% for format in formats %}
+    <th title="{{ format.name }}">{{ format.extension }}</th>
+    {% endfor %}
+</tr>
+{% for book in books %}
+<tr>
+    <td title="{{ book.title }}"><a href="{{ book.get_absolute_url }}">{{ book.link }}</a></td>
+    <td>{{ book.added_date|date:"Y-m-d" }}</td>
+    <td>{{ book.publish_date|date:"Y-m-d" }}</td>
+    {% for format in formats %}
+    <td>{% if book|has_format:format %}<img src="{{ format.image.url }}"/>{% endif %}</td>
+    {% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</form>
+</div>
+
+{% endblock content %}

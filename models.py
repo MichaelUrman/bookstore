@@ -393,7 +393,7 @@ class Purchase(models.Model):
         return self.publication.format
 
     class Meta:
-        ordering = ["date"]
+        ordering = ["-date"]
         
     def __unicode__(self):
         return '%s %s of %s at %s' % (self.get_status_display(), self.get_transaction_display(), self.publication, self.date)

@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import condition, require_POST
 from django.db.models import Count
 
-from bookstore.models import Genre, Person, Book, BookPublication
+from bookstore.models import Genre, Person, Book, BookPublication, BookFormat
 from bookstore.models import Purchase, MergedUser, PaypalIpn, Download
 from bookstore.models import SiteNewsBanner, SitePage, StorefrontNewsCard, StorefrontAd
 from django.contrib.auth.models import User
@@ -438,6 +438,16 @@ def require_staff(view):
     return surrogate_view
 
 @require_staff
+def staff_allbooks(request):
+    books = Book.objects.all()
+    sort = request.REQUEST.get('sort')
+    if sort:
+        books = books.order_by(sort.strip("+"))
+
+    formats = BookFormat.objects.all()
+    return render_to_response("bookstore/staff_allbooks.html", locals())
+
+@require_staff
 def staff_purchase(request):
     user = request.REQUEST.get('user')
     if user:
@@ -517,3 +527,4 @@ def staff_review(request):
         
     books = Book.objects.all()
     return render_to_response("bookstore/staff_review.html", locals(), context_instance=RequestContext(request))
+    

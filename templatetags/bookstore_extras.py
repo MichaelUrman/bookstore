@@ -83,6 +83,13 @@ def chain(value, next):
     for v in next: yield v
     
 @register.filter
+def has_format(book, format):
+    for pub in book.bookpublication_set.all():
+        if pub.format == format:
+            return True
+    return False
+    
+@register.filter
 def ppattrs(value, name=None):
     if name:
         return getattr(value, name)
