@@ -11,6 +11,7 @@
 </div>
 
 {% if cards %}
+<div id="card-deck">
 <div class="ui-corner-all ui-tabs ui-widget ui-widget-content bshadow" id="cards">
     <ul class="ui-helper-hidden">
         {% for card in cards %}<li><a href="#card{{ card.id }}">{{forloop.counter}}</a></li>{% endfor %}
@@ -23,6 +24,10 @@
     </div>
     {% endfor %}
 </div{# cards #}>
+<div id="card-nav">
+{% for card in cards %}<span href="#card{{ card.id }}">&bull;</span> {% endfor %}
+</div>
+</div>
 {% endif %}
 
 {% for ad in center_ads %}
@@ -57,5 +62,14 @@
 {% block onready %}{{block.super}}
 $("#cards").tabs().tabs("rotate", 5000, true).tabs("option", "fx", { opacity: "toggle" });
 $("#cards").hover(function() { $(this).tabs("rotate", 0, true); }, function() { $(this).tabs("rotate", 5000, true); });
+$("#cards").bind("tabsselect", function(evt, ui) { 
+    $("#card-nav > .current").toggleClass("current");
+    $($("#card-nav > span")[ui.index]).addClass("current");
+});
+$("#card-nav > span").mouseover(function(evt) {
+    evt.preventDefault();
+    $("#cards").tabs("select", $(this).attr("href"));
+});
+$($("#card-nav > span")[0]).addClass("current");
 $("ul").removeClass("ui-helper-clearfix").css("overflow", "hidden");
 {% endblock onready %}
