@@ -15,7 +15,7 @@
 {% endif %}
 
 <div class="entry ui-corner-all" id="purchase">
-<a href="{{ booklink }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" /></a><br/>
+<a href="{{ book.get_absolute_url }}"><img class="cover ui-corner-all shadow" width="150" height="225" src="{{ book.page_image_small.url }}" alt="{{ book.title }}" /></a><br/>
 <h3>Purchasing <em>{{ book.title }}</em></h3>
 <p>Click the button below to complete this transaction on PayPal. Once your payment has been processed, you will receive an email with instructions for downloading <em>{{ book.title }}</em> ({{ pub.format.name }}). This email will be sent to the address registered to your PayPal account.</p>
 
