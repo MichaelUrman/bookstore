@@ -156,8 +156,23 @@ def author_detail(request, author_link):
     return render_to_response("bookstore/author_detail.html", locals())
 
 migrate_authors = {
-    "DCPetterson": "DC_Petterson",
-    "George_O%26Gorman": "George_OGorman",
+    "John_Anderson": "john-anderson",
+    "natasha_bennet": "natasha-bennet",
+    "RE_Blakeslee": "re-blakeslee",
+    "Jordan_Brewer": "jordan-brewer",
+    "DJ_Cockburn": "dj-cockburn",
+    "Joseph_Cox": "joseph-cox",
+    "John_Leahy": "john-leahy",
+    "Ellen_Lett": "ellen-lett",
+    "lydia_nyx": "lydia-nyx",
+    "George_OGorman": "george-ogorman",
+    "George_O%26Gorman": "george-ogorman",
+    "Tom_Olbert": "tom-olbert",
+    "DC_Petterson": "dc-petterson",
+    "DCPetterson": "dc-petterson",
+    "Jaiden_Robert": "jaiden-robert",
+    "Glenn_Stuart": "glenn-stuart",
+    "I_Writer": "i-writer",
 }
 
 def book_list(request):
@@ -175,11 +190,34 @@ def book_detail(request, book_link, migrate_url=False):
     return render_to_response("bookstore/book_detail.html", locals())
 
 migrate_books = dict(
-    Body_Servant_of_Aleops="The_Body_Servant_of_Aleops",
-    magic_occult="magick_occult",
-    myth="Myths_Tales",
+    Still_Life="still-life",
+    Under_the_Hooked_Cross="under-hooked-cross",
+    The_Body_Servant_of_Aleops="body-servant-aleops",
+    Body_Servant_of_Aleops="body-servant-aleops",
+    venus_loop_tom_olbert="venus-loop",
+    stockwood_street="stockwood-street",
+    The_Last_Ride_ofthe_Reverse_Cowgirls="last-ride-reverse-cowgirls",
+    In_the_Dunes="dunes",
+    The_Zombie_Attached_To_My_Head="zombie-attached-my-head",
+    Sallowed_Blood="sallowed-blood",
+    A_Violin_s_Cry="violins-cry",
+    violin_s_cry="violins-cry",
+    Autumn_s_Spirit="autumns-spirit",
+    The_Last_Guardian="last-guardian",
+    Rune_Song="rune-song",
+    the_lovers="lovers-tale-prehistoric-ain-sakhri-figurine",
+    To_the_Highest_Bidder="highest-bidder",
+    Beautiful_Cruelty="beautiful-cruelty",
+
+    Science_Fiction="science-fiction",
+    Horror_Gothic="horror-and-gothic",
+    magick_occult="magick-and-occult",
+    magic_occult="magick-and-occult",
+    young_adult="young-adult",
+    Myths_Tales="myths-and-tales",
+    myth="myths-and-tales",
     superhero="Superheroes",
-    violin_s_cry="A_Violin_s_Cry",
+    free_read="free-read",
 )
 
 def coming_soon(request):
@@ -208,7 +246,15 @@ def genre_detail(request, genre_link):
     return render_to_response("bookstore/genre_detail.html", locals())
 
 migrate_genres = dict(
-    magic_occult="magick_occult",
+    Science_Fiction="science-fiction",
+    Horror_Gothic="horror-and-gothic",
+    magick_occult="magick-and-occult",
+    magic_occult="magick-and-occult",
+    Young_Adult="young-adult",
+    Myths_Tales="myths-and-tales",
+    myth="myths-and-tales",
+    superhero="Superheroes",
+    free_reads="free-read",
 )
 
 try:
