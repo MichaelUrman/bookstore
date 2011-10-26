@@ -31,3 +31,8 @@
 {% endif %}
 </div>
 {% endblock body %}
+
+{% block onready %}
+var theFrame = $("#sitepicks", parent.document.body);
+theFrame.height($(document.body).height());
+{% endblock onready %}
