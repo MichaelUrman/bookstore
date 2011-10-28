@@ -102,7 +102,17 @@ def sitemap(request):
     site_pages = SitePage.objects.filter(visible=True).order_by("display_order")
     root = request.build_absolute_uri("/").rstrip("/")
     return render_to_response("bookstore/sitemap.xml", locals())
-    
+
+def robots(request):
+    return HttpResponse("""Sitemap: %s
+User-agent: *
+Disallow: /signin/
+Disallow: /signout/
+Disallow: /purchase/
+Disallow: /user/
+Disallow: /paypal/
+""" % (request.build_absolute_uri(reverse(sitemap)),), mimetype="text/plain")
+
 def site_page(request, page_link, migrate_url=False):
     page = get_migrated_object_or_404(SitePage, migrate_pages, link__iexact=page_link, visible=True)
     if page.link != page_link or migrate_url:
